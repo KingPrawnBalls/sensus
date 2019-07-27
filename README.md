@@ -1,0 +1,2 @@
+# sensus
+School management system
