@@ -2,10 +2,12 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '',
+    'dsn' => 'sqlsrv:server=sensus.database.windows.net;database=sensus',
+    'username' => 'sadmin',
+    'password' => 'KASDbkqwdas^&%1233',
     'charset' => 'utf8',
+    'attributes' => array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
+
 
     // Schema cache options (for production environment)
     //'enableSchemaCache' => true,

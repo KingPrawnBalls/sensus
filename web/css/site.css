@@ -3,6 +3,24 @@ body {
     height: 100%;
 }
 
+nav.navbar {
+    background-color: #00b8d6;
+    min-height: 130px;
+}
+
+nav img {
+    max-height: 100px;
+}
+
+.navbar-inverse .navbar-nav > li > a,
+.navbar-inverse .btn-link {
+    color: white;
+}
+
+nav ul {
+    margin-top: 40px !important;
+}
+
 .wrap {
     min-height: 100%;
     height: auto;
