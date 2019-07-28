@@ -11,10 +11,11 @@ use yii\web\IdentityInterface;
  * @property int $id
  * @property string $user_name
  * @property string $full_name
- * @property string $status
  * @property string $password_hash
  * @property string $email
  * @property string $auth_key
+ * @property string $user_type
+ * @property string $status
  * @property string $password write-only password
  */
 class User extends \yii\db\ActiveRecord implements IdentityInterface
@@ -23,13 +24,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     const STATUS_INACTIVE = 'I';
     const STATUS_ACTIVE = 'A';
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'Users';
-    }
+    const USER_TYPE_TEACHER = 'TEACHER';
+    const USER_TYPE_ADMIN = 'ADMIN';
+    const USER_TYPE_SUPERUSER = 'SUPERUSER';
 
     /**
      * {@inheritdoc}
@@ -37,10 +34,11 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['user_name', 'full_name', 'status', 'password_hash'], 'required'],
-            [['user_name', 'full_name', 'password_hash', 'email'], 'string', 'max' => 255],
+            [['user_name', 'full_name', 'status', 'password_hash', 'user_type'], 'required'],
+            [['user_name', 'full_name', 'password_hash', 'email', 'user_type'], 'string', 'max' => 255],
             [['status'], 'string', 'max' => 1],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
+            ['user_type', 'in', 'range' => [self::USER_TYPE_ADMIN, self::USER_TYPE_SUPERUSER, self::USER_TYPE_TEACHER]],
         ];
     }
 
