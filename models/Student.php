@@ -18,6 +18,10 @@ use Yii;
  */
 class Student extends \yii\db\ActiveRecord
 {
+    const STATUS_DELETED = 'D';
+    const STATUS_INACTIVE = 'I';
+    const STATUS_ACTIVE = 'A';
+
     /**
      * {@inheritdoc}
      */
@@ -35,6 +39,7 @@ class Student extends \yii\db\ActiveRecord
             [['first_name', 'last_name', 'status'], 'required'],
             [['first_name', 'last_name'], 'string', 'max' => 255],
             [['status'], 'string', 'max' => 1],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
         ];
     }
 
