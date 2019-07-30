@@ -25,6 +25,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     const STATUS_ACTIVE = 'A';
 
     const USER_TYPE_TEACHER = 'TEACHER';
+    const USER_TYPE_ASSISTANT = 'ASSISTANT';
     const USER_TYPE_ADMIN = 'ADMIN';
     const USER_TYPE_SUPERUSER = 'SUPERUSER';
 
@@ -38,7 +39,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             [['user_name', 'full_name', 'password_hash', 'email', 'user_type'], 'string', 'max' => 255],
             [['status'], 'string', 'max' => 1],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
-            ['user_type', 'in', 'range' => [self::USER_TYPE_ADMIN, self::USER_TYPE_SUPERUSER, self::USER_TYPE_TEACHER]],
+            ['user_type', 'in', 'range' => [self::USER_TYPE_ADMIN, self::USER_TYPE_ASSISTANT, self::USER_TYPE_SUPERUSER, self::USER_TYPE_TEACHER]],
         ];
     }
 
@@ -55,6 +56,20 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             'password' => 'Password',
             'email' => 'Email'
         ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdmin() {
+        return ($this->user_type === self::USER_TYPE_ADMIN) || ($this->user_type === self::USER_TYPE_SUPERUSER);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSuperUser() {
+        return $this->user_type === self::USER_TYPE_SUPERUSER;
     }
 
     /**

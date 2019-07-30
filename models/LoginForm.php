@@ -32,6 +32,7 @@ class LoginForm extends Model
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
+            ['username', 'validateUserType'],
         ];
     }
 
@@ -48,7 +49,25 @@ class LoginForm extends Model
             $user = $this->getUser();
 
             if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect username or password.');
+                $this->addError($attribute, 'Incorrect username or password.  (CODE:001)');
+            }
+        }
+    }
+
+    /**
+     * Validates the user type.
+     * This method ensures that teaching assistants can't log in
+     *
+     * @param string $attribute the attribute currently being validated
+     * @param array $params the additional name-value pairs given in the rule
+     */
+    public function validateUserType($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            $user = $this->getUser();
+
+            if (!$user || $user->user_type === $user::USER_TYPE_ASSISTANT) {
+                $this->addError($attribute, 'Incorrect username or password.  (CODE:002)');
             }
         }
     }

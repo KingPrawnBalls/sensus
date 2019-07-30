@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
     <p>
         It is still a work in progress.  Please send bug reports, feature requests, and any other comments
-        to <b>pharding [at] kcionline [dot] org</b>
+        to <br> <b>pharding [at] kcionline [dot] org</b>
     </p>
     <p>
         Thank you!

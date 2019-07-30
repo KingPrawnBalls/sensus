@@ -9,6 +9,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
 use app\models\LoginForm;
+use app\models\Form;
+use app\models\FormSearch;
 //use app\models\ContactForm;
 
 class SiteController extends Controller
@@ -67,11 +69,33 @@ class SiteController extends Controller
                 'loginUrl' => Url::to(['site/login'])
             ]);
         } else {
+
+            //TODO - remove hardcoded year!
+            //Lookup all forms (classes)
+            $forms = Form::find([
+                'status' => Form::STATUS_ACTIVE,
+                'year' => 2018,
+            ])->orderBy(['name'=>SORT_ASC])->all();
+
             return $this->render('home', [
+                'forms' => $forms,
                 'registerUrl' => Url::to(['site/register']),
                 'reportsUrl' => Url::to(['site/reports']),
             ]);
         }
+    }
+
+    public function actionRegister() {
+
+        //TODO - remove hardcoded year!
+        $forms = Form::find([
+            'status' => Form::STATUS_ACTIVE,
+            'year' => 2018,
+        ])->orderBy(['name'=>SORT_ASC])->all();
+
+        return $this->render('register', [
+            'data' => $data,
+        ]);
     }
 
     /**

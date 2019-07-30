@@ -12,6 +12,11 @@ nav img {
     max-height: 100px;
 }
 
+.navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:hover, .navbar-inverse .navbar-nav > .active > a:focus {
+    color: black;
+    background-color: white;
+}
+
 .navbar-inverse .navbar-nav > li > a,
 .navbar-inverse .btn-link {
     color: white;
@@ -19,6 +24,10 @@ nav img {
 
 nav ul {
     margin-top: 40px !important;
+}
+
+.site-index .btn-group {
+    margin-right: 20px;
 }
 
 .wrap {
@@ -41,7 +50,7 @@ nav ul {
 
 .jumbotron {
     text-align: center;
-    background-color: transparent;
+    /*background-color: transparent;*/
 }
 
 .jumbotron .btn {
