@@ -66,13 +66,29 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php } ?>
             </table>
 
-            <div class="row">
+            <div>
                 <?= Html::submitButton('Save', ['class' => 'btn btn-success pull-right']) ?>
 
-                <?= Html::a('&lt; Cancel', 'site/index', ['class'=>'text-danger pull-left']) ?>
+                <?= Html::a('&lt; Cancel', 'site/index', ['class'=>'text-danger']) ?>
             </div>
 
         <?php ActiveForm::end(); ?>
+
+        <div style="margin-top: 2em;">
+            <a data-toggle="collapse" href="#codeDescriptions" role="button" aria-expanded="false" aria-controls="codeDescriptions">
+                Show descriptions for codes &darr;
+            </a>
+        </div>
+        <div class="collapse" id="codeDescriptions">
+            <ul class="list-unstyled">
+                <?php
+                    foreach (\app\models\Attendance::ATTENDANCE_VALID_CODES as $code) {
+                        echo "<li><b style='font-family: monospace; padding-right: 10px;'>$code</b> " . \app\models\Attendance::getAttendanceCodeForDisplay($code) . '</li>';
+                    }
+                ?>
+            </ul>
+        </div>
+
     </div>
 
 
