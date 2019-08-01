@@ -85,19 +85,6 @@ class SiteController extends Controller
         }
     }
 
-    public function actionRegister() {
-
-        //TODO - remove hardcoded year!
-        $forms = Form::find([
-            'status' => Form::STATUS_ACTIVE,
-            'year' => 2018,
-        ])->orderBy(['name'=>SORT_ASC])->all();
-
-        return $this->render('register', [
-            'data' => $data,
-        ]);
-    }
-
     /**
      * Login action.
      *
