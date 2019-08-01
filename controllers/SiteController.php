@@ -65,9 +65,7 @@ class SiteController extends Controller
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest) {
-            return $this->render('index', [
-                'loginUrl' => Url::to(['site/login'])
-            ]);
+            return $this->render('index');
         } else {
 
             //TODO - remove hardcoded year!
@@ -79,8 +77,6 @@ class SiteController extends Controller
 
             return $this->render('home', [
                 'forms' => $forms,
-                'registerUrl' => Url::to(['site/register']),
-                'reportsUrl' => Url::to(['site/reports']),
             ]);
         }
     }

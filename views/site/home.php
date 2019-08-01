@@ -1,9 +1,7 @@
 <?php
 
 /* @var $this yii\web\View */
-/* @var $forms array */
-/* @var $loginUrl String */
-/* @var $model Form */
+/* @var $forms Form[] */
 
 $this->title = 'Sensus School Management System';
 
@@ -37,11 +35,11 @@ $userIdentity = \Yii::$app->user->identity;
         <h3>Run a report</h3>
 
         <div class="btn-group" role="group">
-            <button class="btn btn-lg btn-primary" onclick="window.location='<?=$reportsUrl?>'">Today's attendance</button>
+            <button class="btn btn-lg btn-primary" onclick="window.location='<?=Url::to(['attendance/today'])?>'">Today's attendance</button>
         </div>
 
         <div class="btn-group" role="group">
-            <button class="btn btn-warning" onclick="window.location='<?=$reportsUrl?>'">Custom report</button>
+            <button class="btn btn-warning" onclick="window.location='<?=Url::to(['site/reports'])?>'">Custom report</button>
         </div>
 
     </div>
