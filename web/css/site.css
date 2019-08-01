@@ -140,3 +140,22 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+
+
+.attendance-create .container {
+    width: 400px;
+}
+
+.attendance-create td {
+    font-size:1.5em;
+}
+
+.attendance-create input[type=checkbox] {
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(2); /* IE */
+    -moz-transform: scale(2); /* FF */
+    -webkit-transform: scale(2); /* Safari and Chrome */
+    -o-transform: scale(2); /* Opera */
+    transform: scale(2);
+    padding: 10px;
+}

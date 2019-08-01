@@ -42,13 +42,13 @@ AppAsset::register($this);
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
 
-            !Yii::$app->user->isGuest ? (
+            /*!Yii::$app->user->isGuest ? (
             ['label' => 'Register', 'url' => ['/site/register']]
             ) : '',
 
             !Yii::$app->user->isGuest ? (
             ['label' => 'Reports', 'url' => ['/site/reports']]
-            ) : '',
+            ) : '',*/
 
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]

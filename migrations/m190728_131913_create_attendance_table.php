@@ -21,6 +21,7 @@ class m190728_131913_create_attendance_table extends Migration
             'id' => $this->primaryKey(),
             'form_id' => $this->integer()->notNull(),
             'student_id' => $this->integer()->notNull(),
+            'date' => $this->date()->notNull(),
             'period' => $this->integer(1)->notNull(),
             'attendance_code' => $this->char(1)->notNull(),
             'last_modified' => $this->dateTime()->notNull(),

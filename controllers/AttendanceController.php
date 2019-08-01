@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\AttendanceForm;
+use app\models\Form;
 use Yii;
 use app\models\Attendance;
 use app\models\AttendanceSearch;
@@ -23,7 +25,7 @@ class AttendanceController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-//                'only' => ['create', 'update'],
+                'except' => ['create'],
                 'rules' => [
                     // allow authenticated users
                     [
@@ -75,20 +77,29 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Creates a new Attendance model.
+     * Creates a new Attendance record.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     * @param integer $form_id of form (class)
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($form_id)
     {
-        $model = new Attendance();
+        $attendanceFormModel = new AttendanceForm(['form_id'=>$form_id]);
+        $form = Form::findOne($form_id);
+        $students = $form->students;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if (Yii::$app->request->isPost) {
+            $attendanceFormModel->isPresent = Yii::$app->request->post('isPresent');
+            if ($attendanceFormModel->save()) {
+                //return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'formattedAttendancePeriod' => AttendanceForm::formatPeriodForDisplay(AttendanceForm::getCurrentPeriod()),
+            'attendanceFormModel' => $attendanceFormModel,
+            'form' => $form,
+            'students' => $students,
         ]);
     }
 

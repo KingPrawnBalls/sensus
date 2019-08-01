@@ -78,7 +78,10 @@ class Form extends \yii\db\ActiveRecord
      */
     public function getStudents()
     {
-        return $this->hasMany(Student::className(), ['id' => 'student_id'])->viaTable('student_form', ['form_id' => 'id']);
+        return $this->hasMany(Student::className(), ['id' => 'student_id'])
+            ->where(['status'=>Student::STATUS_ACTIVE])
+            ->viaTable('student_form', ['form_id' => 'id'])
+            ->orderBy(['last_name'=>SORT_ASC, 'first_name'=>SORT_ASC]);
     }
 
     /**
