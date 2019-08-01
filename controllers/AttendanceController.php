@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\AttendanceForm;
 use app\models\Form;
+use http\Exception\RuntimeException;
 use Yii;
 use app\models\Attendance;
 use app\models\AttendanceSearch;
@@ -84,22 +85,57 @@ class AttendanceController extends Controller
      */
     public function actionCreate($form_id)
     {
-        $attendanceFormModel = new AttendanceForm(['form_id'=>$form_id]);
         $form = Form::findOne($form_id);
         $students = $form->students;
 
+        //Create Attendance Model for each student
+        $attendanceModelArray = array();
+        $date = date(Yii::$app->params['dbDateFormat']);
+        $period = Attendance::getCurrentPeriod();
+        foreach ($students as $student) {
+            $queryParams = array(
+                'form_id' => $form_id,
+                'student_id' => $student->id,
+                'date' => $date,
+                'period' => $period,
+            );
+            $att = Attendance::findOne($queryParams);
+
+            if ($att === null) {
+                //Create and store a new record
+                $att = new Attendance($queryParams);
+                $att->attendance_code = '0';
+                $att->last_modified = date(Yii::$app->params['dbDateTimeFormat']);
+                $att->last_modified_by = Yii::$app->user->id;
+
+                if (!$att->last_modified_by)
+                    throw new RuntimeException('Couldn\'t get logged in user ID to save with Registration data.');
+
+                if (!$att->save(false))
+                    throw new RuntimeException('Couldn\'t save new Registration data for student with ID '.$att->student_id);
+            }
+            $attendanceModelArray[] = $att;
+        }
+
         if (Yii::$app->request->isPost) {
-            $attendanceFormModel->isPresent = Yii::$app->request->post('isPresent');
-            if ($attendanceFormModel->save()) {
-                //return $this->redirect(['view', 'id' => $model->id]);
+            if (Attendance::loadMultiple($attendanceModelArray, Yii::$app->request->post()) && Attendance::validateMultiple($attendanceModelArray)) {
+                foreach ($attendanceModelArray as $updatedAttendance) {
+                    /* @var $updatedAttendance Attendance */
+                    $updatedAttendance->last_modified = date(Yii::$app->params['dbDateTimeFormat']);
+                    $updatedAttendance->last_modified_by = Yii::$app->user->id;
+                    $updatedAttendance->save(false);
+                }
+                $session = Yii::$app->session;
+                $session->setFlash('savedSuccessfully', 'Registration for class saved OK.');
+
             }
         }
 
         return $this->render('create', [
-            'formattedAttendancePeriod' => AttendanceForm::formatPeriodForDisplay(AttendanceForm::getCurrentPeriod()),
-            'attendanceFormModel' => $attendanceFormModel,
-            'form' => $form,
+            'formattedAttendancePeriod' => Attendance::formatPeriodForDisplay($period),
+            'attendanceModelArray' => $attendanceModelArray,
             'students' => $students,
+            'form' => $form,
         ]);
     }
 

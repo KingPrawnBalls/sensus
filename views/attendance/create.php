@@ -4,10 +4,13 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $attendanceFormModel app\models\AttendanceForm */
+/* @var $attendanceModelArray app\models\Attendance[] */
+/* @var $students app\models\Student[] */
 /* @var $form app\models\Form */
 /* @var $formattedAttendancePeriod string */
-/* @var $students app\models\Student[] */
+
+/* @var $form ActiveForm */
+
 
 $this->title = 'Register';
 $this->params['breadcrumbs'][] = ['label' => 'Attendances', 'url' => ['index']];
@@ -28,13 +31,16 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php } ?>
 
             <table class="table table-striped">
+
                 <?php foreach ($students as $idx=>$student) { ?>
                 <tr>
                     <td style="text-align: right">
                         <?=$student->first_name?> <?=$student->last_name?>
                     </td>
                     <td style="text-align: left">
-                        <input type="checkbox" class="form-check-input" name="isPresent[<?= $student->id?>]">
+                        <?php
+                            echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->checkbox();
+                        ?>
                     </td>
                 </tr>
                 <?php } ?>

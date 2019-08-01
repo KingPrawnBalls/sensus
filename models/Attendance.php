@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use http\Exception\RuntimeException;
 use Yii;
 
 /**
@@ -21,6 +22,24 @@ class Attendance extends \yii\db\ActiveRecord
 {
     const ATTENDANCE_PERIOD_MORNING = 1;
     const ATTENDANCE_PERIOD_AFTERNOON = 2;
+
+    public static function getCurrentPeriod() {
+        $hour = date('H');
+        return ($hour > 12) ? Attendance::ATTENDANCE_PERIOD_AFTERNOON : Attendance::ATTENDANCE_PERIOD_MORNING;
+    }
+
+    public static function formatPeriodForDisplay($period) {
+        switch ($period) {
+            case Attendance::ATTENDANCE_PERIOD_MORNING:
+                return 'morning';
+                break;
+            case Attendance::ATTENDANCE_PERIOD_AFTERNOON:
+                return 'afternoon';
+                break;
+            default:
+                throw new RuntimeException("Unknown Attendance Period uncountered: $period");
+        }
+    }
 
     /**
      * {@inheritdoc}
