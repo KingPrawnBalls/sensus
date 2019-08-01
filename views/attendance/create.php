@@ -1,5 +1,6 @@
 <?php
 
+use yii\bootstrap\Alert;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -8,9 +9,13 @@ use yii\widgets\ActiveForm;
 /* @var $students app\models\Student[] */
 /* @var $form app\models\Form */
 /* @var $formattedAttendancePeriod string */
+/* @var $fullAttendanceInputRangeAllowed string */
 
 /* @var $form ActiveForm */
 
+$this->registerJs(
+    "$('td.attendance input').keyup(function(){ $(this).val($(this).val().toUpperCase()); });"
+);
 
 $this->title = 'Register';
 $this->params['breadcrumbs'][] = ['label' => 'Attendances', 'url' => ['index']];
@@ -20,6 +25,15 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="attendance-create">
 
     <h1><?= Html::encode($this->title) ?> <button class='btn btn-lg btn-success'><?=$form->name?></button> <?= date(Yii::$app->params['longDateFormat'])?> (<?=$formattedAttendancePeriod;?>)</h1>
+
+    <?php
+        if (Yii::$app->session->hasFlash('savedSuccessfully')) {
+            echo Alert::widget([
+                'options' => ['class' => 'alert-info'],
+                'body' => Yii::$app->session->getFlash('savedSuccessfully'),
+            ]);
+        }
+    ?>
 
     <div class="container">
         <?php $form = ActiveForm::begin(); ?>
@@ -34,12 +48,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?php foreach ($students as $idx=>$student) { ?>
                 <tr>
-                    <td style="text-align: right">
+                    <td class="student-name">
                         <?=$student->first_name?> <?=$student->last_name?>
                     </td>
-                    <td style="text-align: left">
+                    <td class="attendance">
                         <?php
-                            echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->checkbox();
+                            if ($fullAttendanceInputRangeAllowed) {
+                                echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->textInput(['maxlength' => '1']);
+                            } else if (!is_numeric($attendanceModelArray[$idx]->attendance_code)) {
+                                echo '<b>'.$attendanceModelArray[$idx]->attendance_code.'</b>';   //Read only for this user
+                            } else {
+                                echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->checkbox();
+                            }
                         ?>
                     </td>
                 </tr>

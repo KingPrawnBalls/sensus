@@ -126,16 +126,19 @@ class AttendanceController extends Controller
                     $updatedAttendance->save(false);
                 }
                 $session = Yii::$app->session;
-                $session->setFlash('savedSuccessfully', 'Registration for class saved OK.');
+                $session->setFlash('savedSuccessfully', 'Registration data for class saved OK.');
 
             }
         }
+
+        $fullAttendanceInputRangeAllowed = Yii::$app->user->identity->isAdmin();
 
         return $this->render('create', [
             'formattedAttendancePeriod' => Attendance::formatPeriodForDisplay($period),
             'attendanceModelArray' => $attendanceModelArray,
             'students' => $students,
             'form' => $form,
+            'fullAttendanceInputRangeAllowed' => $fullAttendanceInputRangeAllowed,
         ]);
     }
 
