@@ -19,6 +19,15 @@ $this->registerJs(
 
 $this->title = 'Register';
 
+//Create an array for the dropdown box of attendance options, which shows the code as a prefix to the description
+$attendanceCodeDropdownOptions = \app\models\Attendance::ATTENDANCE_VALID_CODES;
+array_walk($attendanceCodeDropdownOptions,
+    function (&$item, $key) {
+        $item = "$key - $item";
+    }
+);
+
+
 ?>
 <div class="attendance-create">
 
@@ -52,7 +61,8 @@ $this->title = 'Register';
                     <td class="attendance">
                         <?php
                             if ($fullAttendanceInputRangeAllowed) {
-                                echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->textInput(['maxlength' => '1']);
+                                //echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->textInput(['maxlength' => '1']);
+                                echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->dropDownList($attendanceCodeDropdownOptions);
                             } else if (!is_numeric($attendanceModelArray[$idx]->attendance_code)) {
                                 echo '<b>'.$attendanceModelArray[$idx]->attendance_code.'</b>';   //Read only for this user
                                 echo '<span class="attendance-desc">'.\app\models\Attendance::getAttendanceCodeForDisplay($attendanceModelArray[$idx]->attendance_code).'</span>';
@@ -81,8 +91,8 @@ $this->title = 'Register';
         <div class="collapse" id="codeDescriptions">
             <ul class="list-unstyled">
                 <?php
-                    foreach (\app\models\Attendance::ATTENDANCE_VALID_CODES as $code) {
-                        echo "<li><b style='font-family: monospace; padding-right: 10px;'>$code</b> " . \app\models\Attendance::getAttendanceCodeForDisplay($code) . '</li>';
+                    foreach (\app\models\Attendance::ATTENDANCE_VALID_CODES as $code=>$desc) {
+                        echo "<li><b style='font-family: monospace; padding-right: 10px;'>$code</b> $desc</li>";
                     }
                 ?>
             </ul>
