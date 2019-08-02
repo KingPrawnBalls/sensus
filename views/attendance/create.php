@@ -18,8 +18,6 @@ $this->registerJs(
 );
 
 $this->title = 'Register';
-$this->params['breadcrumbs'][] = ['label' => 'Attendances', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
 
 ?>
 <div class="attendance-create">
@@ -57,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->textInput(['maxlength' => '1']);
                             } else if (!is_numeric($attendanceModelArray[$idx]->attendance_code)) {
                                 echo '<b>'.$attendanceModelArray[$idx]->attendance_code.'</b>';   //Read only for this user
+                                echo '<span class="attendance-desc">'.\app\models\Attendance::getAttendanceCodeForDisplay($attendanceModelArray[$idx]->attendance_code).'</span>';
                             } else {
                                 echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->checkbox();
                             }

@@ -170,3 +170,9 @@ a.desc:after {
     transform: scale(2);
     padding: 10px;
 }
+
+.attendance-desc {
+    font-size: 50%;
+    margin-left: 10px;
+    color: #888;
+}
