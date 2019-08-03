@@ -52,6 +52,8 @@ class Attendance extends \yii\db\ActiveRecord
         '#' => 'Planned whole or partial school closure'
     ];
 
+    const ATTENDANCE_CODES_ON_PREMISES = ['1', '0', 'L', 'U'];  //0 included as this means "not sure"
+
     public static function getAttendanceCodeForDisplay($code) {
         return self::ATTENDANCE_VALID_CODES[$code];
     }

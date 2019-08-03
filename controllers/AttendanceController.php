@@ -6,6 +6,7 @@ use app\models\Form;
 use http\Exception\RuntimeException;
 use Yii;
 use app\models\Attendance;
+use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 
@@ -101,6 +102,34 @@ class AttendanceController extends Controller
             'students' => $students,
             'form' => $form,
             'fullAttendanceInputRangeAllowed' => $fullAttendanceInputRangeAllowed,
+        ]);
+    }
+
+
+    /**
+     * Displays a report of today's attendance
+     *
+     * @return mixed
+     */
+    public function actionToday() {
+
+        $today = date(Yii::$app->params['dbDateFormat']);
+
+        $onPremisesAttendanceCodes = "'" . implode("','", Attendance::ATTENDANCE_CODES_ON_PREMISES) . "'";
+
+        $reportData = Yii::$app->db->createCommand(
+            "SELECT f.name as form_name, s.last_name, s.first_name, a.period, a.attendance_code
+                    FROM student s 
+                    JOIN attendance a on s.id = a.student_id
+                    JOIN form f on a.form_id = f.id
+                    WHERE a.date = :date
+                      AND a.attendance_code IN ($onPremisesAttendanceCodes)
+                    ORDER BY f.name, s.last_name, s.first_name, a.period")
+            ->bindValue(':date', $today)
+            ->queryAll();
+
+        return $this->render('today', [
+            'dataProvider' => new ArrayDataProvider(['allModels'=>$reportData]),
         ]);
     }
 
