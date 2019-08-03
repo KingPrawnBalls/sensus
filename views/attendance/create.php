@@ -56,7 +56,7 @@ array_walk($attendanceCodeDropdownOptions,
                 <?php foreach ($students as $idx=>$student) { ?>
                 <tr>
                     <td class="student-name">
-                        <?=$student->first_name?> <?=$student->last_name?>
+                        <?=$student->last_name?> <?=$student->first_name?>
                     </td>
                     <td class="attendance">
                         <?php
