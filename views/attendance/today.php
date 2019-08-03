@@ -13,8 +13,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php // TODO transform the code to show the full desc ?>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
@@ -22,8 +20,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'form_name',
             'last_name',
             'first_name',
-            'period',
-            'attendance_code',
+            array(
+                'class' => 'yii\grid\DataColumn',
+                'attribute'=>'period',
+                'value'=>function ($model, $key, $index, $column) {
+                    return $model[$column->attribute] === \app\models\Attendance::ATTENDANCE_PERIOD_MORNING ? 'am' : 'pm';
+                },
+            ),
+            array(
+                'class' => 'yii\grid\DataColumn',
+                'attribute'=>'attendance_code',
+                'label'=>'Notes',
+                'value'=>function ($model, $key, $index, $column) {
+                    $code = $model[$column->attribute];
+                    return \app\models\Attendance::ATTENDANCE_VALID_CODES[$code];
+                },
+            ),
         ],
 
     ]); ?>

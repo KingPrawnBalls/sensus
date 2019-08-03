@@ -117,6 +117,7 @@ class AttendanceController extends Controller
 
         $onPremisesAttendanceCodes = "'" . implode("','", Attendance::ATTENDANCE_CODES_ON_PREMISES) . "'";
 
+        //TODO - only return latest period recorded ?
         $reportData = Yii::$app->db->createCommand(
             "SELECT f.name as form_name, s.last_name, s.first_name, a.period, a.attendance_code
                     FROM student s 
