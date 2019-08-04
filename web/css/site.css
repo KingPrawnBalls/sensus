@@ -176,3 +176,11 @@ a.desc:after {
     margin-left: 10px;
     color: #888;
 }
+
+.visitor-create .field-visitor-first_name,
+.visitor-create .field-visitor-last_name,
+.visitor-create .field-visitor-visiting
+{
+    width: 50%;
+    min-width: 350px;
+}

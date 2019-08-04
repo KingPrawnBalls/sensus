@@ -32,6 +32,14 @@ $userIdentity = \Yii::$app->user->identity;
 
         <hr class="my-4">
 
+        <h3>Check in/out visitors</h3>
+
+        <div class="btn-group" role="group">
+            <button class="btn btn-lg btn-primary" onclick="window.location='<?=Url::to(['visitor/index'])?>'">Manage Visitors</button>
+        </div>
+
+        <hr class="my-4">
+
         <h3>Run a report</h3>
 
         <div class="btn-group" role="group">
