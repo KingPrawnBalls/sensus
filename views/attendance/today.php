@@ -4,7 +4,8 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $dataProvider yii\data\ArrayDataProvider */
+/* @var $attendanceDataProvider yii\data\ArrayDataProvider */
+/* @var $visitorsDataProvider yii\data\ArrayDataProvider */
 
 $this->title = 'On premises ' . date(Yii::$app->params['longDateFormat']);
 $this->params['breadcrumbs'][] = $this->title;
@@ -13,8 +14,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
+    <h2>Students</h2>
     <?= GridView::widget([
-        'dataProvider' => $dataProvider,
+        'dataProvider' => $attendanceDataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'form_name',
@@ -40,5 +42,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ]); ?>
 
+
+    <h2>Visitors</h2>
+    <?= GridView::widget([
+        'dataProvider' => $visitorsDataProvider,
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+            'first_name',
+            'last_name',
+            'check_in_dt:time',
+            'visiting',
+        ],
+    ]); ?>
 
 </div>

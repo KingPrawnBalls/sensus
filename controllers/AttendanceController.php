@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Form;
+use app\models\Visitor;
 use http\Exception\RuntimeException;
 use Yii;
 use app\models\Attendance;
@@ -129,8 +130,17 @@ class AttendanceController extends Controller
             ->bindValue(':date', $today)
             ->queryAll();
 
+        /* @var $attendanceDataProvider \yii\data\ActiveDataProvider */
+        $attendanceDataProvider = new ArrayDataProvider(['allModels'=>$reportData]);
+        $attendanceDataProvider->pagination = false;
+
+        /* @var $visitorsDataProvider \yii\data\ActiveDataProvider */
+        $visitorsDataProvider = Visitor::findAllCheckedInNow();
+        $visitorsDataProvider->pagination = false;
+
         return $this->render('today', [
-            'dataProvider' => new ArrayDataProvider(['allModels'=>$reportData]),
+            'attendanceDataProvider' => $attendanceDataProvider,
+            'visitorsDataProvider' => $visitorsDataProvider,
         ]);
     }
 
