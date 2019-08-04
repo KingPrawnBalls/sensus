@@ -40,4 +40,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
+    <?= Html::a('&lt; Back', '/visitor/index') ?>
+
 </div>

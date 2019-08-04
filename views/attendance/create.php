@@ -78,7 +78,7 @@ array_walk($attendanceCodeDropdownOptions,
             <div>
                 <?= Html::submitButton('Save', ['class' => 'btn btn-success pull-right']) ?>
 
-                <?= Html::a('&lt; Cancel', 'site/index', ['class'=>'text-danger']) ?>
+                <?= Html::a('&lt; Cancel', '/site/index', ['class'=>'text-danger']) ?>
             </div>
 
         <?php ActiveForm::end(); ?>
