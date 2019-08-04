@@ -130,17 +130,13 @@ class AttendanceController extends Controller
             ->bindValue(':date', $today)
             ->queryAll();
 
-        /* @var $attendanceDataProvider \yii\data\ActiveDataProvider */
-        $attendanceDataProvider = new ArrayDataProvider(['allModels'=>$reportData]);
-        $attendanceDataProvider->pagination = false;
-
         /* @var $visitorsDataProvider \yii\data\ActiveDataProvider */
         $visitorsDataProvider = Visitor::findAllCheckedInNow();
         $visitorsDataProvider->pagination = false;
 
         return $this->render('today', [
-            'attendanceDataProvider' => $attendanceDataProvider,
-            'visitorsDataProvider' => $visitorsDataProvider,
+            'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$reportData, 'pagination'=>false]),
+            'visitorsDataProvider' => new ArrayDataProvider(['allModels' => $visitorsDataProvider->getModels(), 'pagination'=>false]),
         ]);
     }
 
