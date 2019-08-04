@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\data\ActiveDataProvider;
 
 /**
  * This is the model class for table "visitor".
@@ -73,6 +74,22 @@ class Visitor extends \yii\db\ActiveRecord
     public function getCheckedOutBy()
     {
         return $this->hasOne(User::className(), ['id' => 'checked_out_by']);
+    }
+
+    /**
+     * @return ActiveDataProvider
+     */
+    public static function findAllCheckedInNow()
+    {
+        $midnight = date(Yii::$app->params['dbDateTimeFormat'], strtotime('today midnight'));
+        $now = date(Yii::$app->params['dbDateTimeFormat']);
+
+        return new ActiveDataProvider([
+            'query' => self::find()
+                ->andWhere('check_out_dt is null')
+                ->andWhere("check_in_dt between '$midnight' and '$now'")
+                ->addOrderBy('check_in_dt'),
+        ]);
     }
 
     /**

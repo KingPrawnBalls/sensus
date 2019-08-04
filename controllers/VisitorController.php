@@ -50,15 +50,7 @@ class VisitorController extends Controller
      */
     public function actionIndex()
     {
-        $midnight = date(Yii::$app->params['dbDateTimeFormat'], strtotime('today midnight'));
-        $now = date(Yii::$app->params['dbDateTimeFormat']);
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => Visitor::find()
-                ->andWhere('check_out_dt is null')
-                ->andWhere("check_in_dt between '$midnight' and '$now'")
-                ->addOrderBy('check_in_dt'),
-        ]);
+        $dataProvider = Visitor::findAllCheckedInNow();
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
