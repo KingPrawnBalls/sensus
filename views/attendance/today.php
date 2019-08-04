@@ -26,7 +26,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\DataColumn',
                 'attribute'=>'period',
                 'value'=>function ($model, $key, $index, $column) {
-                    return ucfirst(\app\models\Attendance::formatPeriodForDisplay($model[$column->attribute]));
+                    $spaceSeparatedPeriods = $model[$column->attribute];
+                    $periodsArray = explode(' ', $spaceSeparatedPeriods);
+                    array_walk($periodsArray, function(&$item) {
+                        $item = ucfirst(\app\models\Attendance::formatPeriodForDisplay($item));
+                    });
+                    return implode(' / ', $periodsArray);
                 },
             ),
             array(
@@ -34,8 +39,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'attendance_code',
                 'label'=>'Notes',
                 'value'=>function ($model, $key, $index, $column) {
-                    $code = $model[$column->attribute];
-                    return \app\models\Attendance::ATTENDANCE_VALID_CODES[$code];
+                    $spaceSeparatedValues = $model[$column->attribute];
+                    $valuesArray = explode(' ', $spaceSeparatedValues);
+                    array_walk($valuesArray, function(&$item) {
+                        $item = \app\models\Attendance::ATTENDANCE_VALID_CODES[$item];
+                    });
+                    return implode(" / ", $valuesArray);
                 },
             ),
         ],

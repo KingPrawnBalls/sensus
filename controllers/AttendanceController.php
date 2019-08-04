@@ -118,15 +118,17 @@ class AttendanceController extends Controller
 
         $onPremisesAttendanceCodes = "'" . implode("','", Attendance::ATTENDANCE_CODES_ON_PREMISES) . "'";
 
-        //TODO - only return latest period recorded ?
         $reportData = Yii::$app->db->createCommand(
-            "SELECT f.name as form_name, s.last_name, s.first_name, a.period, a.attendance_code
+            "SELECT f.name as form_name, s.last_name, s.first_name, 
+                         STRING_AGG (a.period, ' ') WITHIN GROUP (ORDER BY a.period) as period, 
+                         STRING_AGG (a.attendance_code, ' ') WITHIN GROUP (ORDER BY a.period) as attendance_code
                     FROM student s 
                     JOIN attendance a on s.id = a.student_id
                     JOIN form f on a.form_id = f.id
                     WHERE a.date = :date
                       AND a.attendance_code IN ($onPremisesAttendanceCodes)
-                    ORDER BY f.name, s.last_name, s.first_name, a.period")
+                    GROUP BY f.name, s.last_name, s.first_name
+                    ORDER BY f.name, s.last_name, s.first_name")
             ->bindValue(':date', $today)
             ->queryAll();
 
