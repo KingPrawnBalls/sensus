@@ -72,7 +72,7 @@ class Attendance extends \yii\db\ActiveRecord
                 return 'afternoon';
                 break;
             default:
-                throw new RuntimeException("Unknown Attendance Period uncountered: $period");
+                throw new RuntimeException("Unknown Attendance Period encountered: $period");
         }
     }
 

@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\DataColumn',
                 'attribute'=>'period',
                 'value'=>function ($model, $key, $index, $column) {
-                    return $model[$column->attribute] === \app\models\Attendance::ATTENDANCE_PERIOD_MORNING ? 'am' : 'pm';
+                    return ucfirst(\app\models\Attendance::formatPeriodForDisplay($model[$column->attribute]));
                 },
             ),
             array(
