@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -16,13 +17,14 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?php  /* = Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ])*/
+        <?php if (!$model->check_out_dt)
+            echo Html::a('Check out', ['delete', 'id' => $model->id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => "Are you sure you want to check out visitor $model->first_name $model->last_name?",
+                    'method' => 'post',
+                ],
+            ])
         ?>
     </p>
 
@@ -31,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'first_name',
             'last_name',
-            'check_in_dt:time',
+            'check_in_dt:datetime',
             [
                 'attribute' => 'checked_in_by',
                 'value' => function ($model) {
@@ -52,6 +54,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
-    <?= Html::a('&lt; Back', '/visitor/index') ?>
+    <?= Html::a('&lt; Back', Url::to('visitor/index', true)) ?>
 
 </div>

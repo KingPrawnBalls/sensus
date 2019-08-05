@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use http\Exception\RuntimeException;
 use Yii;
 use app\models\Visitor;
 use yii\data\ActiveDataProvider;
@@ -93,38 +94,28 @@ class VisitorController extends Controller
         ]);
     }
 
-    /**
-     * Updates an existing Visitor model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
 
     /**
-     * Deletes an existing Visitor model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * Check out of an existing Visitor model.
+     * If check out is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
 
-        return $this->redirect(['index']);
+        if ($model->check_out_dt !== null)
+            throw new RuntimeException('Can\'t check out a visitor who has already been checked out.');
+
+        $model->check_out_dt = date(Yii::$app->params['dbDateTimeFormat']);
+        $model->checked_out_by = Yii::$app->user->id;
+
+        if ($model->save())
+            return $this->redirect(['index']);
+        else
+            throw new RuntimeException('Couldn\t save the check out details. Please contact your system administrator.');
     }
 
     /**

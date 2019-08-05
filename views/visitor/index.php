@@ -58,10 +58,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 'buttons' => [
                     'view' => function ($url, $model, $key) {
-                        return Html::a('View notes&rarr;', Url::to(['visitor/view', 'id'=>$key]));
+                        return Html::a('View details', Url::to(['visitor/view', 'id'=>$key]));
                     },
                     'delete' => function ($url, $model, $key) {
-                        return Html::a('Check out&rarr;', Url::to(['visitor/delete', 'id'=>$key]), ['class'=>'text-danger']);
+                        return Html::a('Check out', Url::to(['visitor/delete', 'id'=>$key]), [
+                            'class' => 'text-danger',
+                            'data' => [
+                                'confirm' => "Are you sure you want to check out visitor $model->first_name $model->last_name?",
+                                'method' => 'post',
+                            ]
+                        ]);
                     },
                 ],
             ],
