@@ -55,6 +55,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h2>Visitors</h2>
     <?= GridView::widget([
         'dataProvider' => $visitorsDataProvider,
+        'showOnEmpty' => false,
+        'emptyText' => 'No visitors on site.',
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'first_name',
