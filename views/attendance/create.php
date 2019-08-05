@@ -101,8 +101,4 @@ array_walk($attendanceCodeDropdownOptions,
     </div>
 
 
-    <?php /*= $this->render('_form', [
-        'model' => $model,
-    ]) */?>
-
 </div>
