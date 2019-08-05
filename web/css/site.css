@@ -177,6 +177,10 @@ a.desc:after {
     color: #888;
 }
 
+.visitor-index tbody a {
+    margin-right: 10px;
+}
+
 .visitor-create .field-visitor-first_name,
 .visitor-create .field-visitor-last_name,
 .visitor-create .field-visitor-visiting

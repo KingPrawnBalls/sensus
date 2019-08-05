@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -48,16 +49,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'visible' => false,
             ],
             [
-                'class' => 'yii\grid\CheckboxColumn',
-                'header' => 'Check Out'
-            ],
-
-            [
                 'class' => 'yii\grid\ActionColumn',
                 'visibleButtons' => [
                     'update' => false,
-                    'delete' => false,
-                ]
+                    'delete' => true,
+                    'view' => true,
+                ],
+
+                'buttons' => [
+                    'view' => function ($url, $model, $key) {
+                        return Html::a('View notes&rarr;', Url::to(['visitor/view', 'id'=>$key]));
+                    },
+                    'delete' => function ($url, $model, $key) {
+                        return Html::a('Check out&rarr;', Url::to(['visitor/delete', 'id'=>$key]), ['class'=>'text-danger']);
+                    },
+                ],
             ],
         ],
     ]); ?>
