@@ -31,12 +31,24 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'first_name',
             'last_name',
-            'check_in_dt:datetime',
-            'checked_in_by',
+            'check_in_dt:time',
+            [
+                'attribute' => 'checked_in_by',
+                'value' => function ($model) {
+                    $user = $model->checkedInBy;
+                    return $user->full_name;
+                }
+            ],
             'visiting',
             'notes',
             'check_out_dt:datetime',
-            'checked_out_by',
+            [
+                'attribute' => 'checked_out_by',
+                'value' => function ($model) {
+                    $user = $model->checkedOutBy;
+                    return $user ? $user->full_name : null;
+                },
+            ],
         ],
     ]) ?>
 
