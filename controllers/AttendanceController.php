@@ -106,6 +106,79 @@ class AttendanceController extends Controller
         ]);
     }
 
+    protected function pivotDataForDisplay($data, $dtFrom, $dtTo) {
+
+        /** Convert attendance data rows returned from DB into this structure:
+         *   Array: {student_id} => ['last_name'=>'', 'first_name'=>'', 'date 1'=> [{attendance}=>'', 'date 2'=> [{attendance}=>'']]
+         */
+
+        $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
+        $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
+
+        $currentStudentId = null;
+        $newData = array();
+        $dateFormat = Yii::$app->params['dbDateFormat'];
+
+        foreach ($data as $row) {
+            if ($currentStudentId != $row['student_id']) {
+                $newData[$row['student_id']] = [ 'last_name'=>$row['last_name'], 'first_name'=>$row['first_name'] ];
+                $currentStudentId = $row['student_id'];
+
+                //Write into array empty attendance records for whole date range (in case of gaps in database)...
+                $currentDate = new \DateTime("@$dtFrom");
+                for ($i=0; $i<$numberOfDays; $i++) {
+                    //TODO - next line needs to change if the number of registration periods each day ever changes
+                    $newData[$row['student_id']][$currentDate->format($dateFormat)]
+                        = [Attendance::ATTENDANCE_PERIOD_MORNING=>'0', Attendance::ATTENDANCE_PERIOD_AFTERNOON=>'0'];
+                    date_modify($currentDate, '+1 day');
+                }
+            }
+
+            //Find out which periods are recorded for this date/student combination...
+            $periods =  explode(' ', $row['period']);
+            $attendanceCodes = explode(' ', $row['attendance_code']);
+            foreach ($periods as $idx=>$period) {
+                //Overwrite in the new array where data records exist in DB...
+                $newData[$row['student_id']][$row['date']][$period] = $attendanceCodes[$idx];
+            }
+        }
+        return $newData;
+    }
+
+
+    public function actionView($form_id) {
+
+        //TODO parameterize the date start/end
+
+        $dtFrom = strtotime('Monday this week');
+        $dtTo = strtotime('now');
+
+        $formName = Form::findOne($form_id)->name;
+
+        $rawResults = Yii::$app->db->createCommand(
+            "SELECT a.student_id, s.last_name, s.first_name, a.date,
+                         STRING_AGG (a.period, ' ') WITHIN GROUP (ORDER BY a.period) as period, 
+                         STRING_AGG (a.attendance_code, ' ') WITHIN GROUP (ORDER BY a.period) as attendance_code
+                    FROM student s 
+                    JOIN attendance a on s.id = a.student_id
+                    WHERE a.date BETWEEN :d1 AND :d2
+                      AND a.form_id = :form_id
+                    GROUP BY a.student_id, s.last_name, s.first_name, a.date
+                    ORDER BY s.last_name, s.first_name, a.date")
+            ->bindValue(':form_id', $form_id)
+            ->bindValue(':d1', date(Yii::$app->params['dbDateFormat'], $dtFrom))
+            ->bindValue(':d2', date(Yii::$app->params['dbDateFormat'], $dtTo))
+            ->queryAll();
+
+        $reportData = $this->pivotDataForDisplay($rawResults, $dtFrom, $dtTo);
+
+        //TODO implement view
+        return $this->render('view', [
+            'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$reportData, 'pagination'=>false]),
+            'formName' => $formName,
+        ]);
+    }
+
 
     /**
      * Displays a report of today's attendance
