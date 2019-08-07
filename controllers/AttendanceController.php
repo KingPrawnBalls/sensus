@@ -106,11 +106,15 @@ class AttendanceController extends Controller
         ]);
     }
 
-    protected function pivotDataForDisplay($data, $dtFrom, $dtTo) {
-
-        /** Convert attendance data rows returned from DB into this structure:
-         *   Array: {student_id} => ['last_name'=>'', 'first_name'=>'', 'date 1'=> [{attendance}=>'', 'date 2'=> [{attendance}=>'']]
-         */
+    /** Convert attendance data rows returned from DB into a structure friendly for views, with no days missing:
+     *   Array: {student_id} => ['last_name'=>'', 'first_name'=>'', 'date 1'=> [{attendance}=>'', 'date 2'=> [{attendance}=>'']]
+     * @param &$data array - byRef
+     * @param $dtFrom int unix time stamp
+     * @param $dtTo int unix time stamp
+     * @return int number of days the return date spans
+     * @throws
+     */
+    protected function pivotDataForDisplay(&$data, $dtFrom, $dtTo) {
 
         $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
         $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
@@ -142,7 +146,8 @@ class AttendanceController extends Controller
                 $newData[$row['student_id']][$row['date']][$period] = $attendanceCodes[$idx];
             }
         }
-        return $newData;
+        $data = $newData;
+        return $numberOfDays;
     }
 
 
@@ -155,7 +160,7 @@ class AttendanceController extends Controller
 
         $formName = Form::findOne($form_id)->name;
 
-        $rawResults = Yii::$app->db->createCommand(
+        $data = Yii::$app->db->createCommand(
             "SELECT a.student_id, s.last_name, s.first_name, a.date,
                          STRING_AGG (a.period, ' ') WITHIN GROUP (ORDER BY a.period) as period, 
                          STRING_AGG (a.attendance_code, ' ') WITHIN GROUP (ORDER BY a.period) as attendance_code
@@ -170,12 +175,12 @@ class AttendanceController extends Controller
             ->bindValue(':d2', date(Yii::$app->params['dbDateFormat'], $dtTo))
             ->queryAll();
 
-        $reportData = $this->pivotDataForDisplay($rawResults, $dtFrom, $dtTo);
+        $numberOfDays = $this->pivotDataForDisplay($data, $dtFrom, $dtTo);
 
-        //TODO implement view
         return $this->render('view', [
-            'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$reportData, 'pagination'=>false]),
+            'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$data, 'pagination'=>false]),
             'formName' => $formName,
+            'numberOfDays' => $numberOfDays,
         ]);
     }
 
