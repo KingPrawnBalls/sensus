@@ -131,9 +131,14 @@ class AttendanceController extends Controller
                 //Write into array empty attendance records for whole date range (in case of gaps in database)...
                 $currentDate = new \DateTime("@$dtFrom");
                 for ($i=0; $i<$numberOfDays; $i++) {
-                    //TODO - next line needs to change if the number of registration periods each day ever changes
-                    $newData[$row['student_id']][$currentDate->format($dateFormat)]
-                        = [Attendance::ATTENDANCE_PERIOD_MORNING=>'0', Attendance::ATTENDANCE_PERIOD_AFTERNOON=>'0'];
+
+                    if ($currentDate->format('N') < 6) {  //If this date is a Monday-Friday day, include it
+
+                        //TODO - next line needs to change if the number of registration periods each day ever changes
+                        $newData[$row['student_id']][$currentDate->format($dateFormat)]
+                            = [Attendance::ATTENDANCE_PERIOD_MORNING => '0', Attendance::ATTENDANCE_PERIOD_AFTERNOON => '0'];
+
+                    }
                     date_modify($currentDate, '+1 day');
                 }
             }
@@ -142,8 +147,11 @@ class AttendanceController extends Controller
             $periods =  explode(' ', $row['period']);
             $attendanceCodes = explode(' ', $row['attendance_code']);
             foreach ($periods as $idx=>$period) {
-                //Overwrite in the new array where data records exist in DB...
-                $newData[$row['student_id']][$row['date']][$period] = $attendanceCodes[$idx];
+                //Need the array_key_exists check to filter out any rogue data stored for Saturday/Sundays
+                if (array_key_exists($row['date'], $newData[$row['student_id']])) {
+                    //Overwrite in the new array where data records exist in DB...
+                    $newData[$row['student_id']][$row['date']][$period] = $attendanceCodes[$idx];
+                }
             }
         }
         $data = $newData;
