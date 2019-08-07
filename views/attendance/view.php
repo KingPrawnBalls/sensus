@@ -33,7 +33,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function ($model, $key, $index, $column) {
                             /* @var $column \yii\grid\DataColumn */
                             $attendancePeriods = $model[$column->attribute];
-                            return $attendancePeriods[\app\models\Attendance::ATTENDANCE_PERIOD_MORNING] . ' ' . $attendancePeriods[\app\models\Attendance::ATTENDANCE_PERIOD_AFTERNOON];
+                            //TODO - needs to change if number of registration periods is ever increased
+                            $am = $attendancePeriods[\app\models\Attendance::ATTENDANCE_PERIOD_MORNING];
+                            $pm = $attendancePeriods[\app\models\Attendance::ATTENDANCE_PERIOD_AFTERNOON];
+                            return ($am=='1'?'/':$am) . ' ' . ($pm=='1'?'\\':$pm);
                             //\app\models\Attendance::ATTENDANCE_VALID_CODES[$item];  //TODO use as tooltip ?
                         },
                     ];
