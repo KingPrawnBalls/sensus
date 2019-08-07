@@ -2,6 +2,7 @@
 
 return [
     'longDateFormat' => 'l jS F',
+    'shortDateFormat' => 'D d/m/y',
     'dbDateFormat'   => 'Y-m-d',
     'dbDateTimeFormat' => 'Y-m-d H:i:s',
     'adminEmail' => 'pharding@kcionline.org',
