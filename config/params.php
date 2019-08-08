@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'academicYearStartingMonth' => 9,  //September
     'longDateFormat' => 'l jS F',
     'shortDateFormat' => 'D d/m/y',
     'dbDateFormat'   => 'Y-m-d',

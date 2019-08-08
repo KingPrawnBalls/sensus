@@ -57,6 +57,14 @@ class SiteController extends Controller
         ];
     }
 
+    public static function getCurrentAcademicYear() {
+        $dateObject = date_create();
+        $currentCalendarMonth = (int)$dateObject->format('m');
+        $currentCalendarYear  = (int)$dateObject->format('Y');
+
+        return ($currentCalendarMonth < Yii::$app->params['academicYearStartingMonth'] ? $currentCalendarYear-1 : $currentCalendarYear);
+    }
+
     /**
      * Displays homepage.
      *
@@ -68,11 +76,10 @@ class SiteController extends Controller
             return $this->render('index');
         } else {
 
-            //TODO - remove hardcoded year!
-            //Lookup all forms (classes)
-            $forms = Form::find([
+            //Lookup all forms (classes) for the current academic year
+            $forms = Form::find()->where([
                 'status' => Form::STATUS_ACTIVE,
-                'year' => 2018,
+                'year' => self::getCurrentAcademicYear(),
             ])->orderBy(['name'=>SORT_ASC])->all();
 
             return $this->render('home', [
