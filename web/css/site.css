@@ -154,21 +154,23 @@ a.desc:after {
 .attendance-create td.student-name {
     font-size:1.5em;
     text-align: right;
-    vertical-align: middle !important;
 }
 
 .attendance-create input[type=text] {
     width: 3em;
 }
 
-.attendance-create input[type=checkbox] {
-    /* Double-sized Checkboxes */
-    -ms-transform: scale(2); /* IE */
-    -moz-transform: scale(2); /* FF */
-    -webkit-transform: scale(2); /* Safari and Chrome */
-    -o-transform: scale(2); /* Opera */
-    transform: scale(2);
-    padding: 10px;
+.attendance-create .form-group {
+    margin-bottom: 0;
+}
+
+.attendance-create .form-group .help-block,
+.attendance-create .form-group .control-label {
+    display: none;
+}
+
+.attendance-create .form-group label {
+    margin-right: 10px;
 }
 
 .attendance-desc {

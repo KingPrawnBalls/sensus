@@ -9,7 +9,7 @@ use yii\widgets\ActiveForm;
 /* @var $students app\models\Student[] */
 /* @var $form app\models\Form */
 /* @var $formattedAttendancePeriod string */
-/* @var $fullAttendanceInputRangeAllowed string */
+/* @var $isFullAttendanceInputRangeAllowed string */
 
 /* @var $form ActiveForm */
 
@@ -60,14 +60,22 @@ array_walk($attendanceCodeDropdownOptions,
                     </td>
                     <td class="attendance">
                         <?php
-                            if ($fullAttendanceInputRangeAllowed) {
+                            $isEditableByTeacher = in_array($attendanceModelArray[$idx]->attendance_code, ['0', '1', 'L']);
+                            if ($isFullAttendanceInputRangeAllowed) {
+                                //Show drop down list for admins
                                 //echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->textInput(['maxlength' => '1']);
                                 echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->dropDownList($attendanceCodeDropdownOptions);
-                            } else if (!is_numeric($attendanceModelArray[$idx]->attendance_code)) {
-                                echo '<b>'.$attendanceModelArray[$idx]->attendance_code.'</b>';   //Read only for this user
+                            } else if (!$isEditableByTeacher) {
+                                //Show read only because it has been input already by an admin
+                                echo '<b>'.$attendanceModelArray[$idx]->attendance_code.'</b>';
                                 echo '<span class="attendance-desc">'.\app\models\Attendance::getAttendanceCodeForDisplay($attendanceModelArray[$idx]->attendance_code).'</span>';
                             } else {
-                                echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->checkbox();
+                                //Show a radio group for teachers with limited options
+                                echo  $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->radioList([
+                                    '0'=>'Absent',
+                                    '1'=>'Present',
+                                    'L'=>'Late',
+                                ]);
                             }
                         ?>
                     </td>

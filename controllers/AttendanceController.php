@@ -95,14 +95,14 @@ class AttendanceController extends Controller
             }
         }
 
-        $fullAttendanceInputRangeAllowed = Yii::$app->user->identity->isAdmin();
+        $isFullAttendanceInputRangeAllowed = Yii::$app->user->identity->isAdmin();
 
         return $this->render('create', [
             'formattedAttendancePeriod' => Attendance::formatPeriodForDisplay($period),
             'attendanceModelArray' => $attendanceModelArray,
             'students' => $students,
             'form' => $form,
-            'fullAttendanceInputRangeAllowed' => $fullAttendanceInputRangeAllowed,
+            'isFullAttendanceInputRangeAllowed' => $isFullAttendanceInputRangeAllowed,
         ]);
     }
 
