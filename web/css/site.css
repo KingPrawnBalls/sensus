@@ -26,10 +26,6 @@ nav ul {
     margin-top: 40px !important;
 }
 
-.site-index .btn-group {
-    margin-right: 20px;
-}
-
 .wrap {
     min-height: 100%;
     height: auto;
@@ -141,9 +137,19 @@ a.desc:after {
     outline: none;
 }
 
+.site-home .btn-group {
+    margin-right: 0.5em;
+    margin-left: 0.5em;
+}
 
-.attendance-create .container {
-    width: 75%;
+.site-home .btn {
+    margin-bottom: 1em;
+}
+
+@media(min-width:767px) {
+    .attendance-create .container {
+        width: 75%;
+    }
 }
 
 .attendance-create td {
