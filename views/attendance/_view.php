@@ -32,7 +32,7 @@ if (count($attendanceDataProvider->allModels)>0) {
                 'value' => function ($model, $key, $index, $column) {
                     /* @var $column \yii\grid\DataColumn */
                     $attendancePeriods = $model[$column->attribute];
-                    //TODO - needs to change if number of registration periods is ever increased
+                    //TODO - next line needs to change if the number of registration periods each day ever changes
                     $am = $attendancePeriods[Attendance::ATTENDANCE_PERIOD_MORNING];
                     $pm = $attendancePeriods[Attendance::ATTENDANCE_PERIOD_AFTERNOON];
                     $amDisplay = ($am=='1' ? '&sol;'  : ($am=='0' ? '?' : $am ) );
