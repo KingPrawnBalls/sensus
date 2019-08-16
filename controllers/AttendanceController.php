@@ -122,6 +122,7 @@ class AttendanceController extends Controller
         $currentStudentId = null;
         $newData = array();
         $dateFormat = Yii::$app->params['dbDateFormat'];
+        $schoolDaysOfWeek = Yii::$app->params['schoolDaysOfWeek'];
 
         foreach ($data as $row) {
             if ($currentStudentId != $row['student_id']) {
@@ -132,7 +133,7 @@ class AttendanceController extends Controller
                 $currentDate = new \DateTime("@$dtFrom");
                 for ($i=0; $i<$numberOfDays; $i++) {
 
-                    if ($currentDate->format('N') < 6) {  //If this date is a Monday-Friday day, include it
+                    if (strpos($schoolDaysOfWeek, $currentDate->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
 
                         //TODO - next line needs to change if the number of registration periods each day ever changes
                         $newData[$row['student_id']][$currentDate->format($dateFormat)]
