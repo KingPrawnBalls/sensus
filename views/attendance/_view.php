@@ -30,8 +30,12 @@ if (count($attendanceDataProvider->allModels)>0) {
                 'label'=> $maybeDateColumn->format($shortDateFormat),
                 'format'=>'raw',
                 'value' => function ($model, $key, $index, $column) {
-                    /* @var $column \yii\grid\DataColumn */
-                    $attendancePeriods = $model[$column->attribute];
+
+                    if ($column instanceof \yii\grid\DataColumn) {
+                        $attendancePeriods = $model[$column->attribute];
+                    } else {
+                        $attendancePeriods = $model[$column['attribute']];
+                    }
                     //TODO - next line needs to change if the number of registration periods each day ever changes
                     $am = $attendancePeriods[Attendance::ATTENDANCE_PERIOD_MORNING];
                     $pm = $attendancePeriods[Attendance::ATTENDANCE_PERIOD_AFTERNOON];
