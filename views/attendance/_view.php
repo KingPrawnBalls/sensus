@@ -36,9 +36,9 @@ if (count($attendanceDataProvider->allModels)>0) {
                     } else {
                         $attendancePeriods = $model[$column['attribute']];
                     }
-                    //TODO - next line needs to change if the number of registration periods each day ever changes
-                    $am = $attendancePeriods[Attendance::ATTENDANCE_PERIOD_MORNING];
-                    $pm = $attendancePeriods[Attendance::ATTENDANCE_PERIOD_AFTERNOON];
+                    //NOTE: - next line needs to change if the number of registration periods each day ever changes
+                    $am = $attendancePeriods[1];
+                    $pm = $attendancePeriods[2];
                     $amDisplay = ($am=='1' ? '&sol;'  : ($am=='0' ? '?' : $am ) );
                     $pmDisplay = ($pm=='1' ? '&bsol;' : ($pm=='0' ? '?' : $pm ) );
                     return '<span data-toggle="tooltip" data-placement="bottom" title="' .

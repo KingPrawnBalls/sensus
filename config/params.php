@@ -3,6 +3,7 @@
 return [
     'academicYearStartingMonth' => 9,  //September
     'schoolDaysOfWeek' => '12345',  //1=Monday .. 7 is Sunday.
+    'numberOfDailyRegistrationPeriods' => 2,
     'longDateFormat' => 'l jS F',
     'shortDateFormat' => 'D d/m/y',
     'dbDateFormat'   => 'Y-m-d',

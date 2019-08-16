@@ -3,13 +3,16 @@
 use yii\bootstrap\Alert;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use app\models\Attendance;
 
 /* @var $this yii\web\View */
-/* @var $attendanceModelArray app\models\Attendance[] */
+/* @var $attendanceModelArray Attendance[] */
 /* @var $students app\models\Student[] */
 /* @var $form app\models\Form */
 /* @var $formattedAttendancePeriod string */
 /* @var $isFullAttendanceInputRangeAllowed string */
+/* @var $currentPeriod int */
+
 
 /* @var $form ActiveForm */
 
@@ -19,8 +22,10 @@ $this->registerJs(
 
 $this->title = 'Register';
 
+$attribNameForCurrentAttendancePeriod = 'attendance_code_' . $currentPeriod;
+
 //Create an array for the dropdown box of attendance options, which shows the code as a prefix to the description
-$attendanceCodeDropdownOptions = \app\models\Attendance::ATTENDANCE_VALID_CODES;
+$attendanceCodeDropdownOptions = Attendance::ATTENDANCE_VALID_CODES;
 array_walk($attendanceCodeDropdownOptions,
     function (&$item, $key) {
         $item = "$key - $item";
@@ -60,22 +65,17 @@ array_walk($attendanceCodeDropdownOptions,
                     </td>
                     <td class="attendance">
                         <?php
-                            $isEditableByTeacher = in_array($attendanceModelArray[$idx]->attendance_code, ['0', '1', 'L']);
+                            $isEditableByTeacher = in_array($attendanceModelArray[$idx]->getAttribute($attribNameForCurrentAttendancePeriod), array_keys(Attendance::ATTENDANCE_CODES_SELECTABLE_BY_TEACHERS));
                             if ($isFullAttendanceInputRangeAllowed) {
                                 //Show drop down list for admins
-                                //echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->textInput(['maxlength' => '1']);
-                                echo $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->dropDownList($attendanceCodeDropdownOptions);
+                                echo $form->field($attendanceModelArray[$idx], "[$idx]$attribNameForCurrentAttendancePeriod")->dropDownList($attendanceCodeDropdownOptions);
                             } else if (!$isEditableByTeacher) {
                                 //Show read only because it has been input already by an admin
-                                echo '<b>'.$attendanceModelArray[$idx]->attendance_code.'</b>';
-                                echo '<span class="attendance-desc">'.\app\models\Attendance::getAttendanceCodeForDisplay($attendanceModelArray[$idx]->attendance_code).'</span>';
+                                echo '<b>'.$attendanceModelArray[$idx]->getAttribute($attribNameForCurrentAttendancePeriod).'</b>';
+                                echo '<span class="attendance-desc">'.Attendance::getAttendanceCodeForDisplay($attendanceModelArray[$idx]->getAttribute($attribNameForCurrentAttendancePeriod)).'</span>';
                             } else {
                                 //Show a radio group for teachers with limited options
-                                echo  $form->field($attendanceModelArray[$idx], "[$idx]attendance_code")->radioList([
-                                    '0'=>'Absent',
-                                    '1'=>'Present',
-                                    'L'=>'Late',
-                                ]);
+                                echo  $form->field($attendanceModelArray[$idx], "[$idx]$attribNameForCurrentAttendancePeriod")->radioList(Attendance::ATTENDANCE_CODES_SELECTABLE_BY_TEACHERS);
                             }
                         ?>
                     </td>
@@ -99,7 +99,7 @@ array_walk($attendanceCodeDropdownOptions,
         <div class="collapse" id="codeDescriptions">
             <ul class="list-unstyled">
                 <?php
-                    foreach (\app\models\Attendance::ATTENDANCE_VALID_CODES as $code=>$desc) {
+                    foreach (Attendance::ATTENDANCE_VALID_CODES as $code=>$desc) {
                         echo "<li><b style='font-family: monospace; padding-right: 10px;'>$code</b> $desc</li>";
                     }
                 ?>

@@ -24,27 +24,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'first_name',
             array(
                 'class' => 'yii\grid\DataColumn',
-                'attribute'=>'period',
+                'attribute'=>'attendance_code_1',
+                'label'=>\app\models\Attendance::ATTENDANCE_PERIOD_LABELS[1],
                 'value'=>function ($model, $key, $index, $column) {
-                    $spaceSeparatedPeriods = $model[$column->attribute];
-                    $periodsArray = explode(' ', $spaceSeparatedPeriods);
-                    array_walk($periodsArray, function(&$item) {
-                        $item = ucfirst(\app\models\Attendance::formatPeriodForDisplay($item));
-                    });
-                    return implode(' / ', $periodsArray);
+                    $value = $model[$column->attribute];
+                    return \app\models\Attendance::getAttendanceCodeForDisplay($value) ;
                 },
             ),
             array(
                 'class' => 'yii\grid\DataColumn',
-                'attribute'=>'attendance_code',
-                'label'=>'Notes',
+                'attribute'=>'attendance_code_2',
+                'label'=>\app\models\Attendance::ATTENDANCE_PERIOD_LABELS[2],
                 'value'=>function ($model, $key, $index, $column) {
-                    $spaceSeparatedValues = $model[$column->attribute];
-                    $valuesArray = explode(' ', $spaceSeparatedValues);
-                    array_walk($valuesArray, function(&$item) {
-                        $item = \app\models\Attendance::ATTENDANCE_VALID_CODES[$item];
-                    });
-                    return implode(" / ", $valuesArray);
+                    $value = $model[$column->attribute];
+                    return \app\models\Attendance::getAttendanceCodeForDisplay($value) ;
                 },
             ),
         ],

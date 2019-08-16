@@ -12,16 +12,25 @@ use Yii;
  * @property int $form_id
  * @property int $student_id
  * @property date $date
- * @property int $period
- * @property string $attendance_code
+ * @property string $attendance_code_1
+ * @property string $attendance_code_2
  * @property datetime $last_modified
  * @property int $last_modified_by
  *
  */
 class Attendance extends \yii\db\ActiveRecord
 {
-    const ATTENDANCE_PERIOD_MORNING = 1;
-    const ATTENDANCE_PERIOD_AFTERNOON = 2;
+    //NOTE: Adjust this array to support more than 2 daily registration periods
+    const ATTENDANCE_PERIOD_LABELS = [
+        1 => 'am',
+        2 => 'pm',
+    ];
+
+    //NOTE: Adjust this array to support more than 2 daily registration periods
+    const ATTENDANCE_PERIOD_LABELS_LONG = [
+        1 => 'morning',
+        2 => 'afternoon',
+    ];
 
     //Per https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/818204/School_attendance_July_2019.pdf
     const ATTENDANCE_VALID_CODES = [
@@ -52,28 +61,22 @@ class Attendance extends \yii\db\ActiveRecord
         '#' => 'Planned whole or partial school closure'
     ];
 
-    const ATTENDANCE_CODES_ON_PREMISES = ['1', '0', 'L', 'U'];  //0 included as this means "not sure"
+    const ATTENDANCE_CODES_ON_PREMISES = ['0', '1', 'L', 'U'];  //0 included as this means "not sure"
+
+    const ATTENDANCE_CODES_SELECTABLE_BY_TEACHERS = [
+        '0' => 'Absent',
+        '1' => 'Present',
+        'L' => 'Late'
+    ];
 
     public static function getAttendanceCodeForDisplay($code) {
         return self::ATTENDANCE_VALID_CODES[$code];
     }
 
+    //NOTE: Adjust this function to support more than 2 daily registration periods
     public static function getCurrentPeriod() {
         $hour = date('H');
-        return ($hour > 12) ? Attendance::ATTENDANCE_PERIOD_AFTERNOON : Attendance::ATTENDANCE_PERIOD_MORNING;
-    }
-
-    public static function formatPeriodForDisplay($period) {
-        switch ($period) {
-            case Attendance::ATTENDANCE_PERIOD_MORNING:
-                return 'morning';
-                break;
-            case Attendance::ATTENDANCE_PERIOD_AFTERNOON:
-                return 'afternoon';
-                break;
-            default:
-                throw new RuntimeException("Unknown Attendance Period encountered: $period");
-        }
+        return ($hour < 12) ? 1 : 2;
     }
 
     /**
@@ -89,13 +92,13 @@ class Attendance extends \yii\db\ActiveRecord
      */
     public function rules()
     {
+        //NOTE: Add to the attendance_code settings below if additional registration periods are added
         return [
-            [['form_id', 'student_id', 'period', 'attendance_code', 'last_modified', 'last_modified_by'], 'required'],
-            [['form_id', 'student_id', 'period', 'last_modified_by'], 'integer'],
+            [['form_id', 'student_id', 'attendance_code_1', 'attendance_code_2', 'last_modified', 'last_modified_by'], 'required'],
+            [['form_id', 'student_id', 'last_modified_by'], 'integer'],
           //  [['last_modified'], 'safe'],
-            [['attendance_code'], 'string', 'max' => 1],
-            ['attendance_code', 'in', 'range' => array_keys(self::ATTENDANCE_VALID_CODES)],
-            ['period', 'in', 'range' => [self::ATTENDANCE_PERIOD_MORNING, self::ATTENDANCE_PERIOD_AFTERNOON]],
+            [['attendance_code_1', 'attendance_code_2'], 'string', 'max' => 1],
+            [['attendance_code_1', 'attendance_code_2'], 'in', 'range' => array_keys(self::ATTENDANCE_VALID_CODES)],
             [['last_modified_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['last_modified_by' => 'id']],
             [['form_id'], 'exist', 'skipOnError' => true, 'targetClass' => Form::className(), 'targetAttribute' => ['form_id' => 'id']],
             [['student_id'], 'exist', 'skipOnError' => true, 'targetClass' => Student::className(), 'targetAttribute' => ['student_id' => 'id']],
@@ -108,7 +111,8 @@ class Attendance extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'attendance_code' => '',
+            'attendance_code_1' => '',
+            'attendance_code_2' => '',
             'last_modified' => 'Last Modified',
             'last_modified_by' => 'Last Modified By',
         ];

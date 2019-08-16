@@ -55,20 +55,21 @@ class AttendanceController extends Controller
         //Create Attendance Model for each student
         $attendanceModelArray = array();
         $date = date(Yii::$app->params['dbDateFormat']);
-        $period = Attendance::getCurrentPeriod();
+        $currentPeriod = Attendance::getCurrentPeriod();
         foreach ($students as $student) {
             $queryParams = array(
                 'form_id' => $form_id,
                 'student_id' => $student->id,
-                'date' => $date,
-                'period' => $period,
+                'date' => $date
             );
             $att = Attendance::findOne($queryParams);
 
             if ($att === null) {
                 //Create and store a new record
                 $att = new Attendance($queryParams);
-                $att->attendance_code = '0';
+                $att->attendance_code_1 = '0';
+                $att->attendance_code_2 = '0';
+                //NOTE: Add more to above to support more than 2 daily registration periods
                 $att->last_modified = date(Yii::$app->params['dbDateTimeFormat']);
                 $att->last_modified_by = Yii::$app->user->id;
 
@@ -98,7 +99,8 @@ class AttendanceController extends Controller
         $isFullAttendanceInputRangeAllowed = Yii::$app->user->identity->isAdmin();
 
         return $this->render('create', [
-            'formattedAttendancePeriod' => Attendance::formatPeriodForDisplay($period),
+            'currentPeriod' => $currentPeriod,
+            'formattedAttendancePeriod' => Attendance::ATTENDANCE_PERIOD_LABELS_LONG[$currentPeriod],
             'attendanceModelArray' => $attendanceModelArray,
             'students' => $students,
             'form' => $form,
@@ -123,35 +125,29 @@ class AttendanceController extends Controller
         $newData = array();
         $dateFormat = Yii::$app->params['dbDateFormat'];
         $schoolDaysOfWeek = Yii::$app->params['schoolDaysOfWeek'];
+        $numberOfDailyRegistrationPeriods = Yii::$app->params['numberOfDailyRegistrationPeriods'];
 
         foreach ($data as $row) {
             if ($currentStudentId != $row['student_id']) {
                 $newData[$row['student_id']] = [ 'last_name'=>$row['last_name'], 'first_name'=>$row['first_name'] ];
                 $currentStudentId = $row['student_id'];
 
-                //Write into array empty attendance records for whole date range (in case of gaps in database)...
+                //Make an array of empty attendance records for whole date range (in case of gaps in database)...
                 $currentDate = new \DateTime("@$dtFrom");
                 for ($i=0; $i<$numberOfDays; $i++) {
 
                     if (strpos($schoolDaysOfWeek, $currentDate->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
-
-                        //TODO - next line needs to change if the number of registration periods each day ever changes
-                        $newData[$row['student_id']][$currentDate->format($dateFormat)]
-                            = [Attendance::ATTENDANCE_PERIOD_MORNING => '0', Attendance::ATTENDANCE_PERIOD_AFTERNOON => '0'];
-
+                        $newData[$row['student_id']][$currentDate->format($dateFormat)] = array_fill(1, $numberOfDailyRegistrationPeriods, '0');
                     }
                     date_modify($currentDate, '+1 day');
                 }
             }
 
-            //Find out which periods are recorded for this date/student combination...
-            $periods =  explode(' ', $row['period']);
-            $attendanceCodes = explode(' ', $row['attendance_code']);
-            foreach ($periods as $idx=>$period) {
-                //Need the array_key_exists check to filter out any rogue data stored for Saturday/Sundays
-                if (array_key_exists($row['date'], $newData[$row['student_id']])) {
-                    //Overwrite in the new array where data records exist in DB...
-                    $newData[$row['student_id']][$row['date']][$period] = $attendanceCodes[$idx];
+            //Need the array_key_exists check to filter out any rogue data stored for Saturday/Sundays
+            if (array_key_exists($row['date'], $newData[$row['student_id']])) {
+                //Overwrite in the new array where data records exist in DB...
+                for ($i=1; $i <= $numberOfDailyRegistrationPeriods; $i++) {
+                    $newData[$row['student_id']][$row['date']][$i] = $row['attendance_code_'.$i];
                 }
             }
         }
@@ -169,15 +165,14 @@ class AttendanceController extends Controller
 
         $formName = Form::findOne($form_id)->name;
 
+        //NOTE: Adjust this SQL to support more than 2 daily registration periods
         $data = Yii::$app->db->createCommand(
             "SELECT a.student_id, s.last_name, s.first_name, a.date,
-                         STRING_AGG (a.period, ' ') WITHIN GROUP (ORDER BY a.period) as period, 
-                         STRING_AGG (a.attendance_code, ' ') WITHIN GROUP (ORDER BY a.period) as attendance_code
+                         a.attendance_code_1, a.attendance_code_2
                     FROM student s 
                     JOIN attendance a on s.id = a.student_id
                     WHERE a.date BETWEEN :d1 AND :d2
                       AND a.form_id = :form_id
-                    GROUP BY a.student_id, s.last_name, s.first_name, a.date
                     ORDER BY s.last_name, s.first_name, a.date")
             ->bindValue(':form_id', $form_id)
             ->bindValue(':d1', date(Yii::$app->params['dbDateFormat'], $dtFrom))
@@ -205,16 +200,16 @@ class AttendanceController extends Controller
 
         $onPremisesAttendanceCodes = "'" . implode("','", Attendance::ATTENDANCE_CODES_ON_PREMISES) . "'";
 
+        //NOTE: Adjust this SQL to support more than 2 daily registration periods
         $reportData = Yii::$app->db->createCommand(
             "SELECT f.name as form_name, s.last_name, s.first_name, 
-                         STRING_AGG (a.period, ' ') WITHIN GROUP (ORDER BY a.period) as period, 
-                         STRING_AGG (a.attendance_code, ' ') WITHIN GROUP (ORDER BY a.period) as attendance_code
+                         a.attendance_code_1, a.attendance_code_2
                     FROM student s 
                     JOIN attendance a on s.id = a.student_id
                     JOIN form f on a.form_id = f.id
                     WHERE a.date = :date
-                      AND a.attendance_code IN ($onPremisesAttendanceCodes)
-                    GROUP BY f.name, s.last_name, s.first_name
+                      AND (a.attendance_code_1 IN ($onPremisesAttendanceCodes)
+                       OR  a.attendance_code_2 IN ($onPremisesAttendanceCodes))
                     ORDER BY f.name, s.last_name, s.first_name")
             ->bindValue(':date', $today)
             ->queryAll();
