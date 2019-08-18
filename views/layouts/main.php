@@ -3,8 +3,8 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-use app\widgets\Alert;
 use yii\helpers\Html;
+use yii\bootstrap\Alert;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
@@ -72,7 +72,20 @@ AppAsset::register($this);
     <div class="container">
         <?= // Breadcrumbs::widget([ 'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [], ])
         '' ?>
-        <?= Alert::widget() ?>
+        <?php
+        if (Yii::$app->session->hasFlash('savedSuccessfully')) {
+            echo Alert::widget([
+                'options' => ['class' => 'alert-info'],
+                'body' => Yii::$app->session->getFlash('savedSuccessfully'),
+            ]);
+        }
+        if (Yii::$app->session->hasFlash('saveFailed')) {
+            echo Alert::widget([
+                'options' => ['class' => 'alert-danger'],
+                'body' => Yii::$app->session->getFlash('saveFailed'),
+            ]);
+        }
+        ?>
         <?= $content ?>
     </div>
 </div>

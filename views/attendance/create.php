@@ -38,21 +38,6 @@ array_walk($attendanceCodeDropdownOptions,
 
     <h1><?= Html::encode($this->title) ?> <button class='btn btn-lg btn-success'><?=$form->name?></button> <?= date(Yii::$app->params['longDateFormat'])?> (<?=$formattedAttendancePeriod;?>)</h1>
 
-    <?php
-        if (Yii::$app->session->hasFlash('savedSuccessfully')) {
-            echo Alert::widget([
-                'options' => ['class' => 'alert-info'],
-                'body' => Yii::$app->session->getFlash('savedSuccessfully'),
-            ]);
-        }
-        if (Yii::$app->session->hasFlash('saveFailed')) {
-            echo Alert::widget([
-                'options' => ['class' => 'alert-danger'],
-                'body' => Yii::$app->session->getFlash('saveFailed'),
-            ]);
-        }
-    ?>
-
     <div class="container">
         <?php $form = ActiveForm::begin(); ?>
 

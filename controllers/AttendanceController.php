@@ -49,13 +49,14 @@ class AttendanceController extends Controller
      */
     public function actionCreate($form_id)
     {
+        $isSavedOk = false;
         $form = Form::findOne($form_id);
         $students = $form->students;
 
         //Create Attendance Model for each student
         $attendanceModelArray = array();
         $date = date(Yii::$app->params['dbDateFormat']);
-        $currentPeriod = Attendance::getCurrentPeriod();
+
         foreach ($students as $student) {
             $queryParams = array(
                 'form_id' => $form_id,
@@ -84,7 +85,7 @@ class AttendanceController extends Controller
 
         if (Yii::$app->request->isPost) {
             if (Attendance::loadMultiple($attendanceModelArray, Yii::$app->request->post()) && Attendance::validateMultiple($attendanceModelArray)) {
-                $isSavedOk = true;
+
                 foreach ($attendanceModelArray as $updatedAttendance) {
                     /* @var $updatedAttendance Attendance */
                     $updatedAttendance->last_modified = date(Yii::$app->params['dbDateTimeFormat']);
@@ -99,20 +100,24 @@ class AttendanceController extends Controller
                     Yii::$app->session->setFlash('savedSuccessfully', 'Registration data for class saved OK.');
                 else
                     Yii::$app->session->setFlash('saveFailed', 'Registration data could not be saved! Please retry the Save button...');
-
             }
         }
 
-        $isFullAttendanceInputRangeAllowed = Yii::$app->user->identity->isAdmin();
+        if ($isSavedOk) {
+            return $this->redirect(['site/index']);
+        } else {
+            $currentPeriod = Attendance::getCurrentPeriod();
+            $isFullAttendanceInputRangeAllowed = Yii::$app->user->identity->isAdmin();
 
-        return $this->render('create', [
-            'currentPeriod' => $currentPeriod,
-            'formattedAttendancePeriod' => Attendance::ATTENDANCE_PERIOD_LABELS_LONG[$currentPeriod],
-            'attendanceModelArray' => $attendanceModelArray,
-            'students' => $students,
-            'form' => $form,
-            'isFullAttendanceInputRangeAllowed' => $isFullAttendanceInputRangeAllowed,
-        ]);
+            return $this->render('create', [
+                'currentPeriod' => $currentPeriod,
+                'formattedAttendancePeriod' => Attendance::ATTENDANCE_PERIOD_LABELS_LONG[$currentPeriod],
+                'attendanceModelArray' => $attendanceModelArray,
+                'students' => $students,
+                'form' => $form,
+                'isFullAttendanceInputRangeAllowed' => $isFullAttendanceInputRangeAllowed,
+            ]);
+        }
     }
 
     /** Convert attendance data rows returned from DB into a structure friendly for views, with no days missing:
