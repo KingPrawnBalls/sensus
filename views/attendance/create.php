@@ -45,6 +45,12 @@ array_walk($attendanceCodeDropdownOptions,
                 'body' => Yii::$app->session->getFlash('savedSuccessfully'),
             ]);
         }
+        if (Yii::$app->session->hasFlash('saveFailed')) {
+            echo Alert::widget([
+                'options' => ['class' => 'alert-danger'],
+                'body' => Yii::$app->session->getFlash('saveFailed'),
+            ]);
+        }
     ?>
 
     <div class="container">

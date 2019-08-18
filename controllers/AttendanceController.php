@@ -84,14 +84,21 @@ class AttendanceController extends Controller
 
         if (Yii::$app->request->isPost) {
             if (Attendance::loadMultiple($attendanceModelArray, Yii::$app->request->post()) && Attendance::validateMultiple($attendanceModelArray)) {
+                $isSavedOk = true;
                 foreach ($attendanceModelArray as $updatedAttendance) {
                     /* @var $updatedAttendance Attendance */
                     $updatedAttendance->last_modified = date(Yii::$app->params['dbDateTimeFormat']);
                     $updatedAttendance->last_modified_by = Yii::$app->user->id;
-                    $updatedAttendance->save(false);
+                    $isSavedOk = $updatedAttendance->save(false);
+
+                    if (!$isSavedOk)
+                        break;
                 }
-                $session = Yii::$app->session;
-                $session->setFlash('savedSuccessfully', 'Registration data for class saved OK.');
+
+                if ($isSavedOk)
+                    Yii::$app->session->setFlash('savedSuccessfully', 'Registration data for class saved OK.');
+                else
+                    Yii::$app->session->setFlash('saveFailed', 'Registration data could not be saved! Please retry the Save button...');
 
             }
         }
