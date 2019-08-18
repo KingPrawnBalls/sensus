@@ -86,10 +86,15 @@ class AttendanceController extends Controller
         if (Yii::$app->request->isPost) {
             if (Attendance::loadMultiple($attendanceModelArray, Yii::$app->request->post()) && Attendance::validateMultiple($attendanceModelArray)) {
 
+                $lastModifiedValue = date(Yii::$app->params['dbDateTimeFormat']);
+                $lastModifiedByValue = Yii::$app->user->id;
+
                 foreach ($attendanceModelArray as $updatedAttendance) {
                     /* @var $updatedAttendance Attendance */
-                    $updatedAttendance->last_modified = date(Yii::$app->params['dbDateTimeFormat']);
-                    $updatedAttendance->last_modified_by = Yii::$app->user->id;
+                    if (count($updatedAttendance->getDirtyAttributes())) {
+                        $updatedAttendance->last_modified = $lastModifiedValue;
+                        $updatedAttendance->last_modified_by = $lastModifiedByValue;
+                    }
                     $isSavedOk = $updatedAttendance->save(false);
 
                     if (!$isSavedOk)
