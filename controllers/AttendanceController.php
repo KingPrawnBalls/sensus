@@ -2,8 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\Audit;
 use app\models\Form;
 use app\models\Visitor;
+use DateTimeZone;
 use http\Exception\RuntimeException;
 use Yii;
 use app\models\Attendance;
@@ -86,19 +88,43 @@ class AttendanceController extends Controller
         if (Yii::$app->request->isPost) {
             if (Attendance::loadMultiple($attendanceModelArray, Yii::$app->request->post()) && Attendance::validateMultiple($attendanceModelArray)) {
 
-                $lastModifiedValue = date(Yii::$app->params['dbDateTimeFormat']);
-                $lastModifiedByValue = Yii::$app->user->id;
+                $lastModifiedDt = date(Yii::$app->params['dbDateTimeFormat']);
+                $lastModifiedByUserId = Yii::$app->user->id;
+                $lastModifiedByUserName = Yii::$app->user->identity->full_name;
+
 
                 foreach ($attendanceModelArray as $updatedAttendance) {
                     /* @var $updatedAttendance Attendance */
-                    if (count($updatedAttendance->getDirtyAttributes())) {
-                        $updatedAttendance->last_modified = $lastModifiedValue;
-                        $updatedAttendance->last_modified_by = $lastModifiedByValue;
+
+                    $isDirty = count($updatedAttendance->getDirtyAttributes());
+                    $oldAttribValues = [];
+                    if ($isDirty) {
+                        $oldAttribValues = $updatedAttendance->oldAttributes;
+                        $updatedAttendance->last_modified = $lastModifiedDt;
+                        $updatedAttendance->last_modified_by = $lastModifiedByUserId;
                     }
                     $isSavedOk = $updatedAttendance->save(false);
 
-                    if (!$isSavedOk)
-                        break;
+                    if ($isSavedOk) {
+                        if ($isDirty) {
+                            //If it was saved ok and the record was "dirty" (edited), write an audit log
+                            $auditModel = new Audit();
+                            $auditModel->table_name = Attendance::tableName();
+                            $auditModel->foreign_key = $updatedAttendance->id;
+                            $auditModel->data_1_old_val = $oldAttribValues['attendance_code_1'];
+                            $auditModel->data_1_new_val = $updatedAttendance->attendance_code_1;
+                            $auditModel->data_2_old_val = $oldAttribValues['attendance_code_2'];
+                            $auditModel->data_2_new_val = $updatedAttendance->attendance_code_2;
+                            $auditModel->user_notes = null; // ?
+                            $auditModel->modified_by = $lastModifiedByUserName;
+                            $auditModel->modified_date_time = $lastModifiedDt;
+                            $isSavedOk = $auditModel->save();
+                        }
+                    }
+
+                    if (!$isSavedOk) {
+                        break;  //Exit foreach early if either of the above writes to the DB failed.
+                    }
                 }
 
                 if ($isSavedOk)
@@ -141,6 +167,7 @@ class AttendanceController extends Controller
         $currentStudentId = null;
         $newData = array();
         $dateFormat = Yii::$app->params['dbDateFormat'];
+        $localTimeZone = new DateTimeZone(date_default_timezone_get());
         $schoolDaysOfWeek = Yii::$app->params['schoolDaysOfWeek'];
         $numberOfDailyRegistrationPeriods = Yii::$app->params['numberOfDailyRegistrationPeriods'];
 
@@ -149,8 +176,10 @@ class AttendanceController extends Controller
                 $newData[$row['student_id']] = [ 'last_name'=>$row['last_name'], 'first_name'=>$row['first_name'] ];
                 $currentStudentId = $row['student_id'];
 
-                //Make an array of empty attendance records for whole date range (in case of gaps in database)...
                 $currentDate = new \DateTime("@$dtFrom");
+                $currentDate->setTimezone($localTimeZone);
+
+                //Make an array of empty attendance records for whole date range (in case of gaps in database)...
                 for ($i=0; $i<$numberOfDays; $i++) {
 
                     if (strpos($schoolDaysOfWeek, $currentDate->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
