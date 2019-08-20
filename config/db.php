@@ -3,8 +3,8 @@
 return [
     'class' => 'yii\db\Connection',
     'dsn' => 'sqlsrv:server=sensus.database.windows.net;database=sensus',
-    'username' => 'sadmin',
-    'password' => 'KASDbkqwdas^&%1233',
+    'username' => '[insert uid here]',
+    'password' => '[insert pwd here]',
     'charset' => 'utf8',
     'attributes' => array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
 
