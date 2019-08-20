@@ -179,6 +179,10 @@ a.desc:after {
     margin-right: 10px;
 }
 
+.attendance-view td span span:first-child {
+    margin-right: 10px;
+}
+
 .attendance-desc {
     font-size: 50%;
     margin-left: 10px;

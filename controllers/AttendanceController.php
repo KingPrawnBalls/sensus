@@ -185,6 +185,7 @@ class AttendanceController extends Controller
                     if (strpos($schoolDaysOfWeek, $currentDate->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
                         $newData[$row['student_id']][$currentDate->format($dateFormat)] = array_fill(1, $numberOfDailyRegistrationPeriods, '0');
                     }
+                    $newData[$row['student_id']][$currentDate->format($dateFormat)]['attendance_id'] = null;
                     date_modify($currentDate, '+1 day');
                 }
             }
@@ -195,6 +196,7 @@ class AttendanceController extends Controller
                 for ($i=1; $i <= $numberOfDailyRegistrationPeriods; $i++) {
                     $newData[$row['student_id']][$row['date']][$i] = $row['attendance_code_'.$i];
                 }
+                $newData[$row['student_id']][$row['date']]['attendance_id'] = $row['attendance_id'];
             }
         }
         $data = $newData;
@@ -213,7 +215,7 @@ class AttendanceController extends Controller
 
         //NOTE: Adjust this SQL to support more than 2 daily registration periods
         $data = Yii::$app->db->createCommand(
-            "SELECT a.student_id, s.last_name, s.first_name, a.date,
+            "SELECT a.id AS attendance_id, a.student_id, s.last_name, s.first_name, a.date,
                          a.attendance_code_1, a.attendance_code_2
                     FROM student s 
                     JOIN attendance a on s.id = a.student_id
@@ -267,6 +269,21 @@ class AttendanceController extends Controller
         return $this->render('today', [
             'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$reportData, 'pagination'=>false]),
             'visitorsDataProvider' => new ArrayDataProvider(['allModels' => $visitorsDataProvider->getModels(), 'pagination'=>false]),
+        ]);
+    }
+
+    public function actionHistory($attendance_id, $column_label, $student_name)
+    {
+        $audits = Audit::find()->where( [
+            'table_name' => Attendance::tableName(),
+            'foreign_key' => $attendance_id,
+        ]);
+
+        return $this->renderAjax('_history', [
+            'auditsDataProvider' => new ArrayDataProvider(['allModels' => $audits->all(), 'pagination'=>false]),
+            'attendance_id' => $attendance_id,
+            'column_label' => $column_label,
+            'student_name' => $student_name,
         ]);
     }
 

@@ -6,7 +6,9 @@
 /* @var $attendanceDataProvider \yii\data\ArrayDataProvider */
 
 use yii\grid\GridView;
+use yii\helpers\Url;
 use \app\models\Attendance;
+use dimmitri\grid\ExpandRowColumn;
 $dbDateFormat = Yii::$app->params['dbDateFormat'];
 $shortDateFormat = Yii::$app->params['shortDateFormat'];
 
@@ -24,10 +26,21 @@ if (count($attendanceDataProvider->allModels)>0) {
         if ($maybeDateColumn === FALSE) {
             $columns[] = $attrib;
         } else {
+            $columnLabel = $maybeDateColumn->format($shortDateFormat);
+
             $columns[] = [
-                'class' => 'yii\grid\DataColumn',
+                'class' => ExpandRowColumn::class,
                 'attribute'=>$attrib,
-                'label'=> $maybeDateColumn->format($shortDateFormat),
+                'column_id' => $attrib,  //TODO add more here?
+                'submitData' => function ($model, $key, $index) use ($attrib, $columnLabel) {
+                    return [
+                        'attendance_id' => $model[$attrib]['attendance_id'],
+                        'column_label' => $columnLabel,
+                        'student_name' => $model['first_name'] . ' ' . $model['last_name'],
+                    ];
+                },
+                'url' => Url::to(['history']),
+                'label'=> $columnLabel,
                 'format'=>'raw',
                 'value' => function ($model, $key, $index, $column) {
 
