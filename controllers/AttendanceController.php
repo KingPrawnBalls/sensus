@@ -274,6 +274,7 @@ class AttendanceController extends Controller
 
     public function actionHistory($attendance_id, $column_label, $student_name)
     {
+        //TODO add index to Audit table on table_name and foreign_key
         $audits = Audit::find()->where( [
             'table_name' => Attendance::tableName(),
             'foreign_key' => $attendance_id,
