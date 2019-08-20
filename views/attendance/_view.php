@@ -29,9 +29,9 @@ if (count($attendanceDataProvider->allModels)>0) {
             $columnLabel = $maybeDateColumn->format($shortDateFormat);
 
             $columns[] = [
-                'class' => ExpandRowColumn::class,
+                'class' => ExpandRowColumn::class,  //See https://github.com/dimmitri/yii2-expand-row-column
                 'attribute'=>$attrib,
-                'column_id' => $attrib,  //TODO add more here?
+                'column_id' => $attrib,
                 'submitData' => function ($model, $key, $index) use ($attrib, $columnLabel) {
                     return [
                         'attendance_id' => $model[$attrib]['attendance_id'],
