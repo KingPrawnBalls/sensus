@@ -96,7 +96,8 @@ class AttendanceController extends Controller
                 foreach ($attendanceModelArray as $updatedAttendance) {
                     /* @var $updatedAttendance Attendance */
 
-                    $isDirty = count($updatedAttendance->getDirtyAttributes());
+                    //Consider the record dirty if any of the DB attributes are modified, or if user added a note
+                    $isDirty = count($updatedAttendance->getDirtyAttributes()) || $updatedAttendance->notes;
                     $oldAttribValues = [];
                     if ($isDirty) {
                         $oldAttribValues = $updatedAttendance->oldAttributes;
@@ -115,7 +116,7 @@ class AttendanceController extends Controller
                             $auditModel->data_1_new_val = $updatedAttendance->attendance_code_1;
                             $auditModel->data_2_old_val = $oldAttribValues['attendance_code_2'];
                             $auditModel->data_2_new_val = $updatedAttendance->attendance_code_2;
-                            $auditModel->user_notes = null; // ?
+                            $auditModel->user_notes = $updatedAttendance->notes;
                             $auditModel->modified_by = $lastModifiedByUserName;
                             $auditModel->modified_date_time = $lastModifiedDt;
                             $isSavedOk = $auditModel->save();

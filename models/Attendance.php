@@ -69,6 +69,9 @@ class Attendance extends \yii\db\ActiveRecord
         'L' => 'Late'
     ];
 
+    /* @property string $notes - virtual attribute, stored in Audit table */
+    public $notes;
+
     public static function getAttendanceCodeForDisplay($code) {
         return self::ATTENDANCE_VALID_CODES[$code];
     }
@@ -98,6 +101,7 @@ class Attendance extends \yii\db\ActiveRecord
             [['form_id', 'student_id', 'last_modified_by'], 'integer'],
           //  [['last_modified'], 'safe'],
             [['attendance_code_1', 'attendance_code_2'], 'string', 'max' => 1],
+            [['notes'], 'string', 'max' => 2000],
             [['attendance_code_1', 'attendance_code_2'], 'in', 'range' => array_keys(self::ATTENDANCE_VALID_CODES)],
             [['last_modified_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['last_modified_by' => 'id']],
             [['form_id'], 'exist', 'skipOnError' => true, 'targetClass' => Form::className(), 'targetAttribute' => ['form_id' => 'id']],

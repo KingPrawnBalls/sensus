@@ -70,6 +70,7 @@ array_walk($attendanceCodeDropdownOptions,
                             }
                         ?>
                     </td>
+                    <td><?= $form->field($attendanceModelArray[$idx], "[$idx]notes")->textarea() ?></td>
                 </tr>
                 <?php } ?>
             </table>
