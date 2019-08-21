@@ -17,10 +17,20 @@ use yii\grid\GridView;
     'columns' => [
         'modified_date_time:datetime:Modified',
         'modified_by',
-        'data_1_old_val:text:AM old value',
-        'data_1_new_val:text:AM new value',
-        'data_2_old_val:text:PM old value',
-        'data_2_new_val:text:PM new value',
+        [
+            'label'=> 'AM',
+            'format'=>'raw',
+            'value' => function ($model, $key, $index, $column) {
+                return $model->data_1_old_val . '&nbsp;&rarr;&nbsp;' . $model->data_1_new_val;
+            }
+        ],
+        [
+            'label'=> 'PM',
+            'format'=>'raw',
+            'value' => function ($model, $key, $index, $column) {
+                return $model->data_2_old_val . '&nbsp;&rarr;&nbsp;' . $model->data_2_new_val;
+            }
+        ],
         'user_notes:text:Notes',
     ]
 ]) ?>
