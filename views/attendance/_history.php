@@ -13,7 +13,7 @@ use yii\grid\GridView;
 
 <?= GridView::widget([
     'dataProvider' => $auditsDataProvider,
-    'summary' => 'Attendance data change log for ' . $student_name . ', date ' . $column_label,
+    'summary' => 'Attendance data change log for <b>' . $student_name . '</b>, date <b>' . $column_label . '</b>',
     'columns' => [
         'modified_date_time:datetime:Modified',
         'modified_by',

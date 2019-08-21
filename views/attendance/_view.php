@@ -72,5 +72,5 @@ if (count($attendanceDataProvider->allModels)>0) {
 echo GridView::widget([
     'dataProvider' => $attendanceDataProvider,
     'columns' => $columns,
-    'summary' => 'Hover over or tap attendance codes to show explanation.',
+    'summary' => 'Hover over attendance codes to show explanation. Tap/click to see history of changes.',
 ]);
