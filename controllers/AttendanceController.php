@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Audit;
 use app\models\Form;
+use app\models\Student;
 use app\models\Visitor;
 use DateTimeZone;
 use http\Exception\RuntimeException;
@@ -273,7 +274,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    public function actionHistory($attendance_id, $column_label, $student_name)
+    public function actionHistory($attendance_id, $column_label, $student_id)
     {
         //TODO add index to Audit table on table_name and foreign_key
         $audits = Audit::find()->where( [
@@ -281,11 +282,13 @@ class AttendanceController extends Controller
             'foreign_key' => $attendance_id,
         ]);
 
+        $student = Student::findOne($student_id);
+
         return $this->renderAjax('_history', [
             'auditsDataProvider' => new ArrayDataProvider(['allModels' => $audits->all(), 'pagination'=>false]),
             'attendance_id' => $attendance_id,
             'column_label' => $column_label,
-            'student_name' => $student_name,
+            'student_name' => $student->last_name . ' ' . $student->first_name,
         ]);
     }
 

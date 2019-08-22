@@ -36,7 +36,7 @@ if (count($attendanceDataProvider->allModels)>0) {
                     return [
                         'attendance_id' => $model[$attrib]['attendance_id'],
                         'column_label' => $columnLabel,
-                        'student_name' => $model['first_name'] . ' ' . $model['last_name'],
+                        'student_id' => $key,
                     ];
                 },
                 'url' => Url::to(['history']),
