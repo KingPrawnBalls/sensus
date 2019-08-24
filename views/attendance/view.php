@@ -5,7 +5,6 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $attendanceDataProvider \yii\data\ArrayDataProvider */
 /* @var $formName string */
-/* @var $numberOfDays int num of days spanned by the dataset */
 
 $this->title = 'Attendance for  ' . $formName;
 $this->params['breadcrumbs'][] = $this->title;
@@ -19,6 +18,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'attendanceDataProvider' => $attendanceDataProvider,
     ]) ?>
 
-    <p>Showing data for <?=$numberOfDays?> days.</p>
+    <!--p>Showing data for dates: </p-->
 
 </div>

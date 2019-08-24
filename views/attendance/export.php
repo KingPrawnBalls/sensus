@@ -5,7 +5,6 @@
 /* @var $this yii\web\View */
 /* @var $attendanceDataProvider \yii\data\ArrayDataProvider */
 /* @var $formName String */
-/* @var $numberOfDays int */
 
 use \moonland\phpexcel\Excel;
 

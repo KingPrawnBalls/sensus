@@ -7,6 +7,7 @@ use app\models\Form;
 use app\models\Student;
 use app\models\Visitor;
 use DateTimeZone;
+use http\Exception\InvalidArgumentException;
 use http\Exception\RuntimeException;
 use Yii;
 use app\models\Attendance;
@@ -158,7 +159,7 @@ class AttendanceController extends Controller
      * @param &$data array - byRef
      * @param $dtFrom int unix time stamp
      * @param $dtTo int unix time stamp
-     * @return int number of days the return date spans
+     * @return null
      * @throws
      */
     protected function pivotDataForDisplay(&$data, $dtFrom, $dtTo) {
@@ -202,7 +203,7 @@ class AttendanceController extends Controller
             }
         }
         $data = $newData;
-        return $numberOfDays;
+        return;
     }
 
 
@@ -211,7 +212,7 @@ class AttendanceController extends Controller
      * @param &$data array - byRef
      * @param $dtFrom int unix time stamp
      * @param $dtTo int unix time stamp
-     * @return int number of days the return date spans
+     * @return null
      * @throws
      */
     protected function pivotDataForExport(&$data, $dtFrom, $dtTo) {
@@ -255,72 +256,74 @@ class AttendanceController extends Controller
             }
         }
         $data = $newData;
-        return $numberOfDays;
+        return;
     }
 
 
-    public function actionExport($form_id) {
+    public function actionExport($form_id, $date_from, $date_to) {
 
-        //TODO parameterize the date start/end
+        $dtFrom = strtotime($date_from); //e.g. Monday this week
+        $dtTo = strtotime($date_to);
 
-        $dtFrom = strtotime('Monday this week');
-        $dtTo = strtotime('now');
+        if ($dtFrom === false || $dtTo === false) {
+            throw new \yii\base\InvalidArgumentException('Invalid dates passed to Attendance Export action.');
+        }
 
         $formName = Form::findOne($form_id)->name;
 
         //NOTE: Adjust this SQL to support more than 2 daily registration periods
         $data = Yii::$app->db->createCommand(
-            "SELECT a.id AS attendance_id, a.student_id, s.last_name, s.first_name, a.date,
+            'SELECT a.id AS attendance_id, a.student_id, s.last_name, s.first_name, a.date,
                          a.attendance_code_1, a.attendance_code_2
                     FROM student s 
                     JOIN attendance a on s.id = a.student_id
                     WHERE a.date BETWEEN :d1 AND :d2
                       AND a.form_id = :form_id
-                    ORDER BY s.last_name, s.first_name, a.date")
+                    ORDER BY s.last_name, s.first_name, a.date')
             ->bindValue(':form_id', $form_id)
             ->bindValue(':d1', date(Yii::$app->params['dbDateFormat'], $dtFrom))
             ->bindValue(':d2', date(Yii::$app->params['dbDateFormat'], $dtTo))
             ->queryAll();
 
-        $numberOfDays = $this->pivotDataForExport($data, $dtFrom, $dtTo);
+        $this->pivotDataForExport($data, $dtFrom, $dtTo);
 
         return $this->render('export', [
             'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$data, 'pagination'=>false]),
             'formName' => $formName,
-            'numberOfDays' => $numberOfDays,
         ]);
     }
 
 
-    public function actionView($form_id) {
+    public function actionView($form_id, $date_from, $date_to) {
 
-        //TODO parameterize the date start/end
+        $dtFrom = strtotime($date_from); //e.g. Monday this week
+        $dtTo = strtotime($date_to);
 
-        $dtFrom = strtotime('Monday this week');
-        $dtTo = strtotime('now');
+        if ($dtFrom === false || $dtTo === false) {
+            throw new \yii\base\InvalidArgumentException('Invalid dates passed to Attendance View action.');
+        }
 
         $formName = Form::findOne($form_id)->name;
 
         //NOTE: Adjust this SQL to support more than 2 daily registration periods
         $data = Yii::$app->db->createCommand(
-            "SELECT a.id AS attendance_id, a.student_id, s.last_name, s.first_name, a.date,
+            'SELECT a.id AS attendance_id, a.student_id, s.last_name, s.first_name, a.date,
                          a.attendance_code_1, a.attendance_code_2
                     FROM student s 
                     JOIN attendance a on s.id = a.student_id
                     WHERE a.date BETWEEN :d1 AND :d2
                       AND a.form_id = :form_id
-                    ORDER BY s.last_name, s.first_name, a.date")
+                    ORDER BY s.last_name, s.first_name, a.date')
             ->bindValue(':form_id', $form_id)
             ->bindValue(':d1', date(Yii::$app->params['dbDateFormat'], $dtFrom))
             ->bindValue(':d2', date(Yii::$app->params['dbDateFormat'], $dtTo))
             ->queryAll();
 
-        $numberOfDays = $this->pivotDataForDisplay($data, $dtFrom, $dtTo);
+        $this->pivotDataForDisplay($data, $dtFrom, $dtTo);
 
         return $this->render('view', [
             'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$data, 'pagination'=>false]),
             'formName' => $formName,
-            'numberOfDays' => $numberOfDays,
         ]);
     }
 
