@@ -186,8 +186,8 @@ class AttendanceController extends Controller
 
                     if (strpos($schoolDaysOfWeek, $currentDate->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
                         $newData[$row['student_id']][$currentDate->format($dateFormat)] = array_fill(1, $numberOfDailyRegistrationPeriods, '0');
+                        $newData[$row['student_id']][$currentDate->format($dateFormat)]['attendance_id'] = null;
                     }
-                    $newData[$row['student_id']][$currentDate->format($dateFormat)]['attendance_id'] = null;
                     date_modify($currentDate, '+1 day');
                 }
             }
