@@ -174,7 +174,7 @@ class AttendanceController extends Controller
         $numberOfDailyRegistrationPeriods = Yii::$app->params['numberOfDailyRegistrationPeriods'];
 
         foreach ($data as $row) {
-            if ($currentStudentId != $row['student_id']) {
+            if ($currentStudentId != $row['student_id']) {   //Next student encountered
                 $newData[$row['student_id']] = [ 'last_name'=>$row['last_name'], 'first_name'=>$row['first_name'] ];
                 $currentStudentId = $row['student_id'];
 
@@ -203,6 +203,92 @@ class AttendanceController extends Controller
         }
         $data = $newData;
         return $numberOfDays;
+    }
+
+
+    /** Convert attendance data rows returned from DB into a structure friendly for exports, with no days missing:
+     *   Array: {student_id} => ['last_name'=>'', 'first_name'=>'', 'date1|1'=>'', 'date1|2'=>'', 'date2|1'=>'', ... ]]
+     * @param &$data array - byRef
+     * @param $dtFrom int unix time stamp
+     * @param $dtTo int unix time stamp
+     * @return int number of days the return date spans
+     * @throws
+     */
+    protected function pivotDataForExport(&$data, $dtFrom, $dtTo) {
+
+        $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
+        $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
+
+        $currentStudentId = null;
+        $newData = array();
+        $dateFormat = Yii::$app->params['dbDateFormat'];
+        $localTimeZone = new DateTimeZone(date_default_timezone_get());
+        $schoolDaysOfWeek = Yii::$app->params['schoolDaysOfWeek'];
+        $numberOfDailyRegistrationPeriods = Yii::$app->params['numberOfDailyRegistrationPeriods'];
+
+        foreach ($data as $row) {
+            if ($currentStudentId != $row['student_id']) {   //Next student encountered
+                $newData[$row['student_id']] = [ 'last_name'=>$row['last_name'], 'first_name'=>$row['first_name'] ];
+                $currentStudentId = $row['student_id'];
+
+                $currentDate = new \DateTime("@$dtFrom");
+                $currentDate->setTimezone($localTimeZone);
+
+                //Make an array of empty attendance records for whole date range (in case of gaps in database)...
+                for ($i=0; $i<$numberOfDays; $i++) {
+
+                    if (strpos($schoolDaysOfWeek, $currentDate->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
+                        for ($i=1; $i <= $numberOfDailyRegistrationPeriods; $i++) {
+                            $newData[$row['student_id']][$currentDate->format($dateFormat)."|$i"] = '0';
+                        }
+                    }
+                    date_modify($currentDate, '+1 day');
+                }
+            }
+
+            //Need the array_key_exists check to filter out any rogue data stored for Saturday/Sundays
+            if (array_key_exists($row['date'].'|1', $newData[$row['student_id']])) {
+                //Overwrite in the new array where data records exist in DB...
+                for ($i=1; $i <= $numberOfDailyRegistrationPeriods; $i++) {
+                    $newData[$row['student_id']][$row['date']."|$i"] = $row['attendance_code_'.$i];
+                }
+            }
+        }
+        $data = $newData;
+        return $numberOfDays;
+    }
+
+
+    public function actionExport($form_id) {
+
+        //TODO parameterize the date start/end
+
+        $dtFrom = strtotime('Monday this week');
+        $dtTo = strtotime('now');
+
+        $formName = Form::findOne($form_id)->name;
+
+        //NOTE: Adjust this SQL to support more than 2 daily registration periods
+        $data = Yii::$app->db->createCommand(
+            "SELECT a.id AS attendance_id, a.student_id, s.last_name, s.first_name, a.date,
+                         a.attendance_code_1, a.attendance_code_2
+                    FROM student s 
+                    JOIN attendance a on s.id = a.student_id
+                    WHERE a.date BETWEEN :d1 AND :d2
+                      AND a.form_id = :form_id
+                    ORDER BY s.last_name, s.first_name, a.date")
+            ->bindValue(':form_id', $form_id)
+            ->bindValue(':d1', date(Yii::$app->params['dbDateFormat'], $dtFrom))
+            ->bindValue(':d2', date(Yii::$app->params['dbDateFormat'], $dtTo))
+            ->queryAll();
+
+        $numberOfDays = $this->pivotDataForExport($data, $dtFrom, $dtTo);
+
+        return $this->render('export', [
+            'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$data, 'pagination'=>false]),
+            'formName' => $formName,
+            'numberOfDays' => $numberOfDays,
+        ]);
     }
 
 
