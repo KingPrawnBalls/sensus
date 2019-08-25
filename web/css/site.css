@@ -183,6 +183,10 @@ a.desc:after {
     margin-right: 10px;
 }
 
+.attendance-view div.grid-view div.grid-view table {
+    width: auto;
+}
+
 .attendance-desc {
     font-size: 50%;
     margin-left: 10px;

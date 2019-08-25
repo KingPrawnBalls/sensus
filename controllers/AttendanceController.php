@@ -154,82 +154,6 @@ class AttendanceController extends Controller
         }
     }
 
-    /**  Build an array of all the dates covered by the requested date range.  All the dates in reports SQL
-     * have to be explicitly stated in the SQL for the PIVOT statement to work
-     * @param $dtFrom int unix time stamp
-     * @param $dtTo int unix time stamp
-     * @return array of dates between $dtFrom and $dtTo formatted as strings for SQL
-     * @throws \Exception
-     */
-    protected function getArrayOfAllDatesBetweenAandB($dtFrom, $dtTo) {
-
-        $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
-        $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
-        $dateIterator = new \DateTime("@$dtFrom");
-        $dateIterator->setTimezone(new DateTimeZone(date_default_timezone_get()));
-
-        $allDatesArray = [];
-        $DB_DATE_FORMAT = Yii::$app->params['dbDateFormat'];
-        for ($i=0; $i<$numberOfDays; $i++) {
-            $allDatesArray[] = '[' . $dateIterator->format($DB_DATE_FORMAT) . ']';
-            date_modify($dateIterator, '+1 day');
-        }
-
-        return $allDatesArray;
-    }
-
-    /** Convert attendance data rows returned from DB into a structure friendly for views, with no days missing:
-     *   Array: {student_id} => ['last_name'=>'', 'first_name'=>'', 'date 1'=> [{attendance}=>'', 'date 2'=> [{attendance}=>'']]
-     * @param &$data array - byRef
-     * @param $dtFrom int unix time stamp
-     * @param $dtTo int unix time stamp
-     * @return null
-     * @throws
-     */
-    protected function pivotDataForDisplay(&$data, $dtFrom, $dtTo) {
-
-        $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
-        $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
-
-        $currentStudentId = null;
-        $newData = array();
-        $dateFormat = Yii::$app->params['dbDateFormat'];
-        $localTimeZone = new DateTimeZone(date_default_timezone_get());
-        $schoolDaysOfWeek = Yii::$app->params['schoolDaysOfWeek'];
-        $numberOfDailyRegistrationPeriods = Yii::$app->params['numberOfDailyRegistrationPeriods'];
-
-        foreach ($data as $row) {
-            if ($currentStudentId != $row['student_id']) {   //Next student encountered
-                $newData[$row['student_id']] = [ 'form_name'=>$row['form_name'], 'last_name'=>$row['last_name'], 'first_name'=>$row['first_name'] ];
-                $currentStudentId = $row['student_id'];
-
-                $currentDate = new \DateTime("@$dtFrom");
-                $currentDate->setTimezone($localTimeZone);
-
-                //Make an array of empty attendance records for whole date range (in case of gaps in database)...
-                for ($i=0; $i<$numberOfDays; $i++) {
-
-                    if (strpos($schoolDaysOfWeek, $currentDate->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
-                        $newData[$row['student_id']][$currentDate->format($dateFormat)] = array_fill(1, $numberOfDailyRegistrationPeriods, '0');
-                        $newData[$row['student_id']][$currentDate->format($dateFormat)]['attendance_id'] = null;
-                    }
-                    date_modify($currentDate, '+1 day');
-                }
-            }
-
-            //Need the array_key_exists check to filter out any rogue data stored for Saturday/Sundays
-            if (array_key_exists($row['date'], $newData[$row['student_id']])) {
-                //Overwrite in the new array where data records exist in DB...
-                for ($i=1; $i <= $numberOfDailyRegistrationPeriods; $i++) {
-                    $newData[$row['student_id']][$row['date']][$i] = $row['attendance_code_'.$i];
-                }
-                $newData[$row['student_id']][$row['date']]['attendance_id'] = $row['attendance_id'];
-            }
-        }
-        $data = $newData;
-        return;
-    }
-
 
     public function actionExport($date_from, $date_to) {
 
@@ -240,38 +164,7 @@ class AttendanceController extends Controller
             throw new \yii\base\InvalidArgumentException('Invalid dates passed to Attendance Export action.');
         }
 
-        $allDatesArray = $this->getArrayOfAllDatesBetweenAandB($dtFrom, $dtTo);
-        $DB_DATE_FORMAT = Yii::$app->params['dbDateFormat'];
-
-        //Gather all string variables needed to build SQL statement
-        $allDatesString = implode(',', $allDatesArray);
-        $startDateString = date($DB_DATE_FORMAT, $dtFrom);
-        $endDateString = date($DB_DATE_FORMAT, $dtTo);
-        $DELETED_FORM_STATUS = Form::STATUS_DELETED;
-
-        //NOTE: Adjust this SQL if needed to support more than 2 daily registration periods
-        $sql = "SELECT * FROM
-                    (SELECT
-                       f.name AS form_name,
-                       s.id AS student_id,
-                       s.last_name,
-                       s.first_name,
-                       a.date AS attendance_date,
-                       CONCAT(a.id, '|', a.attendance_code_1, '|', a.attendance_code_2) AS attendance_tuple
-                     FROM student s
-                       JOIN attendance a ON s.id = a.student_id
-                       JOIN form f ON a.form_id = f.id
-                     WHERE a.date BETWEEN '$startDateString' AND '$endDateString'
-                       AND f.status <> '$DELETED_FORM_STATUS'
-                     ) AS sourceTable
-                     PIVOT (
-                       MAX(attendance_tuple)
-                       FOR attendance_date
-                        IN ($allDatesString)
-                     ) AS pivotTable
-                ORDER BY form_name, last_name, first_name";
-
-        $data = Yii::$app->db->createCommand($sql)->queryAll();
+        $data = $this->getAttendanceReportData($dtFrom, $dtTo);
 
         return $this->render('export', [
             'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$data, 'pagination'=>false]),
@@ -288,23 +181,7 @@ class AttendanceController extends Controller
             throw new \yii\base\InvalidArgumentException('Invalid dates passed to Attendance View action.');
         }
 
-        $deletedStatus = Form::STATUS_DELETED;
-
-        //NOTE: Adjust this SQL if needing to support more than 2 daily registration periods
-        $data = Yii::$app->db->createCommand(
-            "SELECT a.id AS attendance_id, f.name AS form_name, a.student_id, s.last_name, s.first_name, a.date,
-                         a.attendance_code_1, a.attendance_code_2
-                    FROM student s 
-                    JOIN attendance a on s.id = a.student_id
-                    JOIN form f on a.form_id = f.id
-                    WHERE a.date BETWEEN :d1 AND :d2
-                      AND f.status <> '$deletedStatus'
-                    ORDER BY f.name, s.last_name, s.first_name, a.date")
-            ->bindValue(':d1', date(Yii::$app->params['dbDateFormat'], $dtFrom))
-            ->bindValue(':d2', date(Yii::$app->params['dbDateFormat'], $dtTo))
-            ->queryAll();
-
-        $this->pivotDataForDisplay($data, $dtFrom, $dtTo);
+        $data = $this->getAttendanceReportData($dtFrom, $dtTo);
 
         return $this->render('view', [
             'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$data, 'pagination'=>false])
@@ -347,6 +224,12 @@ class AttendanceController extends Controller
         ]);
     }
 
+    /**
+     * @param $attendance_id
+     * @param $column_label
+     * @param $student_id
+     * @return string
+     */
     public function actionHistory($attendance_id, $column_label, $student_id)
     {
         $audits = Audit::find()->where( [
@@ -362,6 +245,72 @@ class AttendanceController extends Controller
             'column_label' => $column_label,
             'student_name' => $student->last_name . ' ' . $student->first_name,
         ]);
+    }
+
+    /**  Build an array of all the dates covered by the requested date range.  All the dates in reports SQL
+     * have to be explicitly stated in the SQL for the PIVOT statement to work
+     * @param $dtFrom int unix time stamp
+     * @param $dtTo int unix time stamp
+     * @return array of dates between $dtFrom and $dtTo formatted as strings for SQL
+     * @throws \Exception
+     */
+    protected function getArrayOfAllDatesBetweenAandB($dtFrom, $dtTo) {
+
+        $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
+        $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
+        $dateIterator = new \DateTime("@$dtFrom");
+        $dateIterator->setTimezone(new DateTimeZone(date_default_timezone_get()));
+
+        $allDatesArray = [];
+        $DB_DATE_FORMAT = Yii::$app->params['dbDateFormat'];
+        for ($i=0; $i<$numberOfDays; $i++) {
+            $allDatesArray[] = '[' . $dateIterator->format($DB_DATE_FORMAT) . ']';
+            date_modify($dateIterator, '+1 day');
+        }
+
+        return $allDatesArray;
+    }
+
+    /**  Fetch (pivoted) attendance data for a date range from the database
+     * @param int $dtFrom
+     * @param int $dtTo
+     * @return array
+     * @throws \yii\db\Exception
+     */
+    protected function getAttendanceReportData(int $dtFrom, int $dtTo): array
+    {
+        $allDatesArray = $this->getArrayOfAllDatesBetweenAandB($dtFrom, $dtTo);
+        $DB_DATE_FORMAT = Yii::$app->params['dbDateFormat'];
+
+        //Gather all string variables needed to build SQL statement
+        $allDatesString = implode(',', $allDatesArray);
+        $startDateString = date($DB_DATE_FORMAT, $dtFrom);
+        $endDateString = date($DB_DATE_FORMAT, $dtTo);
+        $DELETED_FORM_STATUS = Form::STATUS_DELETED;
+
+        //NOTE: Adjust this SQL if needed to support more than 2 daily registration periods
+        $sql = "SELECT * FROM
+                        (SELECT
+                           f.name AS form_name,
+                           s.id AS student_id,
+                           s.last_name,
+                           s.first_name,
+                           a.date AS attendance_date,
+                           CONCAT(a.id, '|', a.attendance_code_1, '|', a.attendance_code_2) AS attendance_tuple
+                         FROM student s
+                           JOIN attendance a ON s.id = a.student_id
+                           JOIN form f ON a.form_id = f.id
+                         WHERE a.date BETWEEN '$startDateString' AND '$endDateString'
+                           AND f.status <> '$DELETED_FORM_STATUS'
+                         ) AS sourceTable
+                         PIVOT (
+                           MAX(attendance_tuple)
+                           FOR attendance_date
+                            IN ($allDatesString)
+                         ) AS pivotTable
+                    ORDER BY form_name, last_name, first_name";
+
+        return Yii::$app->db->createCommand($sql)->queryAll();
     }
 
 }

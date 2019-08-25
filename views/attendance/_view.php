@@ -12,15 +12,13 @@ use dimmitri\grid\ExpandRowColumn;
 $dbDateFormat = Yii::$app->params['dbDateFormat'];
 $shortDateFormat = Yii::$app->params['shortDateFormat'];
 
-//https://getbootstrap.com/docs/4.3/components/tooltips/#example-enable-tooltips-everywhere
-$this->registerJs(
-    '$(function () { $(\'[data-toggle="tooltip"]\').tooltip() });'
-);
 $columns = [];
 
+$data = $attendanceDataProvider->getModels();
+
 //Examine the first row in the model to determine the columns for the DataGrid
-if (count($attendanceDataProvider->allModels)>0) {
-    foreach (reset($attendanceDataProvider->allModels) as $attrib => $value) {
+if (count($data)) {
+    foreach (reset($data) as $attrib => $value) {
 
         $maybeDateColumn = date_create_from_format($dbDateFormat, $attrib);
         if ($maybeDateColumn === FALSE) {
@@ -33,10 +31,11 @@ if (count($attendanceDataProvider->allModels)>0) {
                 'attribute'=>$attrib,
                 'column_id' => $attrib,
                 'submitData' => function ($model, $key, $index) use ($attrib, $columnLabel) {
+                    $attendanceTuple = explode('|', $model[$attrib]);
                     return [
-                        'attendance_id' => $model[$attrib]['attendance_id'],
+                        'attendance_id' => $attendanceTuple[0],
                         'column_label' => $columnLabel,
-                        'student_id' => $key,
+                        'student_id' => $model['student_id'],
                     ];
                 },
                 'url' => Url::to(['history']),
@@ -44,22 +43,20 @@ if (count($attendanceDataProvider->allModels)>0) {
                 'format'=>'raw',
                 'value' => function ($model, $key, $index, $column) use ($attrib) {
 
-                    $attendancePeriods = $model[$attrib];
+                    $attendanceTuple = explode('|', $model[$attrib]);
 
-                    //NOTE: - next line needs to change if the number of registration periods each day ever changes
-                    $am = $attendancePeriods[1];
-                    $pm = $attendancePeriods[2];
-                    $amDisplay = ($am=='1' ? '&sol;'  : ($am=='0' ? '?' : $am ) );
-                    $pmDisplay = ($pm=='1' ? '&bsol;' : ($pm=='0' ? '?' : $pm ) );
-                    return '<span data-toggle="tooltip" data-placement="bottom" title="' .
-                        Attendance::ATTENDANCE_VALID_CODES[$am] .
-                        '">' .
-                        $amDisplay .
-                        '</span> <span data-toggle="tooltip" data-placement="bottom" title="' .
-                        Attendance::ATTENDANCE_VALID_CODES[$pm] .
-                        '">' .
-                        $pmDisplay .
-                        '</span>';
+                    if (count($attendanceTuple)>1) {
+                        //NOTE: - next lines need to change if the number of registration periods each day ever changes
+                        $am = $attendanceTuple[1];
+                        $pm = $attendanceTuple[2];
+                        $amDisplay = ($am == '1' ? '&sol;' : ($am == '0' ? '?' : $am));
+                        $pmDisplay = ($pm == '1' ? '&bsol;' : ($pm == '0' ? '?' : $pm));
+                        return '<span title="' . Attendance::ATTENDANCE_VALID_CODES[$am] . '">' .
+                            $amDisplay .
+                            '</span> <span title="' . Attendance::ATTENDANCE_VALID_CODES[$pm] . '">' .
+                            $pmDisplay .
+                            '</span>';
+                    }
                 },
             ];
         }
