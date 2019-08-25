@@ -154,6 +154,30 @@ class AttendanceController extends Controller
         }
     }
 
+    /**  Build an array of all the dates covered by the requested date range.  All the dates in reports SQL
+     * have to be explicitly stated in the SQL for the PIVOT statement to work
+     * @param $dtFrom int unix time stamp
+     * @param $dtTo int unix time stamp
+     * @return array of dates between $dtFrom and $dtTo formatted as strings for SQL
+     * @throws \Exception
+     */
+    protected function getArrayOfAllDatesBetweenAandB($dtFrom, $dtTo) {
+
+        $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
+        $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
+        $dateIterator = new \DateTime("@$dtFrom");
+        $dateIterator->setTimezone(new DateTimeZone(date_default_timezone_get()));
+
+        $allDatesArray = [];
+        $DB_DATE_FORMAT = Yii::$app->params['dbDateFormat'];
+        for ($i=0; $i<$numberOfDays; $i++) {
+            $allDatesArray[] = '[' . $dateIterator->format($DB_DATE_FORMAT) . ']';
+            date_modify($dateIterator, '+1 day');
+        }
+
+        return $allDatesArray;
+    }
+
     /** Convert attendance data rows returned from DB into a structure friendly for views, with no days missing:
      *   Array: {student_id} => ['last_name'=>'', 'first_name'=>'', 'date 1'=> [{attendance}=>'', 'date 2'=> [{attendance}=>'']]
      * @param &$data array - byRef
@@ -216,19 +240,8 @@ class AttendanceController extends Controller
             throw new \yii\base\InvalidArgumentException('Invalid dates passed to Attendance Export action.');
         }
 
-        /*Build an array of all the dates covered by the requested date range.  All the dates have to be explicitly stated
-           in the SQL for the PIVOT statement to work */
-        $numberOfDays = date_diff(new \DateTime("@$dtFrom"), new \DateTime("@$dtTo"))->days;
-        $numberOfDays++; //Add one because we want from $dtFrom to $dtTo inclusive
-        $dateIterator = new \DateTime("@$dtFrom");
-        $dateIterator->setTimezone(new DateTimeZone(date_default_timezone_get()));
-
-        $allDatesArray = [];
+        $allDatesArray = $this->getArrayOfAllDatesBetweenAandB($dtFrom, $dtTo);
         $DB_DATE_FORMAT = Yii::$app->params['dbDateFormat'];
-        for ($i=0; $i<$numberOfDays; $i++) {
-            $allDatesArray[] = '[' . $dateIterator->format($DB_DATE_FORMAT) . ']';
-            date_modify($dateIterator, '+1 day');
-        }
 
         //Gather all string variables needed to build SQL statement
         $allDatesString = implode(',', $allDatesArray);
