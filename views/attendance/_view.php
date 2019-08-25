@@ -42,13 +42,10 @@ if (count($attendanceDataProvider->allModels)>0) {
                 'url' => Url::to(['history']),
                 'label'=> $columnLabel,
                 'format'=>'raw',
-                'value' => function ($model, $key, $index, $column) {
+                'value' => function ($model, $key, $index, $column) use ($attrib) {
 
-                    if ($column instanceof \yii\grid\DataColumn) {
-                        $attendancePeriods = $model[$column->attribute];
-                    } else {
-                        $attendancePeriods = $model[$column['attribute']];
-                    }
+                    $attendancePeriods = $model[$attrib];
+
                     //NOTE: - next line needs to change if the number of registration periods each day ever changes
                     $am = $attendancePeriods[1];
                     $pm = $attendancePeriods[2];
