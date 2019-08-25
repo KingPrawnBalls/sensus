@@ -1,6 +1,6 @@
 <div style="margin-top: 2em;">
     <a data-toggle="collapse" href="#codeDescriptions" role="button" aria-expanded="false" aria-controls="codeDescriptions">
-        Show descriptions for codes &darr;
+        <span class="glyphicon glyphicon-info-sign"></span> Show descriptions for codes
     </a>
 </div>
 <div class="collapse" id="codeDescriptions">

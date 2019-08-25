@@ -184,6 +184,8 @@ class AttendanceController extends Controller
         $data = $this->getAttendanceReportData($dtFrom, $dtTo);
 
         return $this->render('view', [
+            'date_from' => $date_from,
+            'date_to' => $date_to,
             'attendanceDataProvider' => new ArrayDataProvider(['allModels'=>$data, 'pagination'=>false])
         ]);
     }

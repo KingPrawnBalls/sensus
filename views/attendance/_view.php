@@ -66,5 +66,5 @@ if (count($data)) {
 echo GridView::widget([
     'dataProvider' => $attendanceDataProvider,
     'columns' => $columns,
-    'summary' => 'Hover over attendance codes to show explanation. Tap/click to see history of changes.',
+    'summary' => 'Tap/click to see history of changes.  See link at foot of report to show attendance code descriptions.',
 ]);
