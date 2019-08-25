@@ -14,6 +14,7 @@ use yii\grid\GridView;
 <?= GridView::widget([
     'dataProvider' => $auditsDataProvider,
     'summary' => 'Attendance data change log for <b>' . $student_name . '</b>, date <b>' . $column_label . '</b>',
+    'emptyText' => 'No change log found for <b>' . $student_name . '</b> for date <b>' . $column_label . '</b>',
     'columns' => [
         'modified_date_time:datetime:Modified',
         'modified_by',
