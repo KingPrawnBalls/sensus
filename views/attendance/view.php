@@ -4,9 +4,8 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $attendanceDataProvider \yii\data\ArrayDataProvider */
-/* @var $formName string */
 
-$this->title = 'Attendance for  ' . $formName;
+$this->title = 'Attendance Report';
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>

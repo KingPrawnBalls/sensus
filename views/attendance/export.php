@@ -4,24 +4,50 @@
 
 /* @var $this yii\web\View */
 /* @var $attendanceDataProvider \yii\data\ArrayDataProvider */
-/* @var $formName String */
 
 use \moonland\phpexcel\Excel;
 
 $data = $attendanceDataProvider->getModels();
-/* See https://www.yiiframework.com/extension/yii2-phpexcel */
 
 if (count($data)) {
-    $first_student_id = array_key_first($data);
-    $columns = array_keys($data[$first_student_id]);
-    $headers = array_combine($columns, $columns);
 
+    $columns = [];
+    $dbDateFormat = Yii::$app->params['dbDateFormat'];
+
+        foreach (reset($data) as $attrib => $value) {
+
+            $maybeDateColumn = date_create_from_format($dbDateFormat, $attrib);
+            if ($maybeDateColumn === FALSE) {
+                $columns[] = [
+                    'attribute' => $attrib,
+                    'header' => $attrib,
+                ];
+            } else {
+                $columns[] = [
+                    'attribute'=>$attrib,
+                    'header' => $attrib,
+                    'format'=>'raw',
+                    'value' => function ($model, $context) use ($attrib) {
+                        $attendanceTuple = $model[$attrib];
+                        if ($attendanceTuple !== null) {
+                            $attendanceTuple = explode('|', $attendanceTuple);
+                            unset ($attendanceTuple[0]);  //Remove the attendance_id in element 0 which we dont include in report.
+                            return implode($attendanceTuple);
+                        } else {
+                            return '';
+                        }
+                    },
+                ];
+            }
+        }
+
+
+    /* See https://www.yiiframework.com/extension/yii2-phpexcel */
     Excel::widget([
-        'fileName' => "$formName attendance.xlsx",
+        'fileName' => "attendance.xlsx",
         'models' => $data,
         'mode' => 'export',
         'asAttachment' => true,
         'columns' => $columns,
-        'headers' => $headers,
     ]);
 }
