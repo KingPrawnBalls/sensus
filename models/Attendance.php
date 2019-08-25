@@ -22,8 +22,8 @@ class Attendance extends \yii\db\ActiveRecord
 {
     //NOTE: Adjust this array to support more than 2 daily registration periods
     const ATTENDANCE_PERIOD_LABELS = [
-        1 => 'am',
-        2 => 'pm',
+        1 => 'AM',
+        2 => 'PM',
     ];
 
     //NOTE: Adjust this array to support more than 2 daily registration periods

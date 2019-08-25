@@ -59,4 +59,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 
+    <div style="margin-top:1em; text-align:center">
+        <button class="btn btn-warning hidden-print" onclick="window.print()">Print this page</button>
+    </div>
+
 </div>
