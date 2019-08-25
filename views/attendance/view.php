@@ -19,4 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <!--p>Showing data for dates: </p-->
 
+    <?= $this->render('_explainCodes') ?>
+
 </div>
