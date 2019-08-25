@@ -265,8 +265,11 @@ class AttendanceController extends Controller
 
         $allDatesArray = [];
         $DB_DATE_FORMAT = Yii::$app->params['dbDateFormat'];
+        $SCHOOL_DAYS_OF_WEEK = Yii::$app->params['schoolDaysOfWeek'];
         for ($i=0; $i<$numberOfDays; $i++) {
-            $allDatesArray[] = '[' . $dateIterator->format($DB_DATE_FORMAT) . ']';
+            if (strpos($SCHOOL_DAYS_OF_WEEK, $dateIterator->format('N')) !== FALSE) {  //If this date is a school day of the week, include it
+                $allDatesArray[] = '[' . $dateIterator->format($DB_DATE_FORMAT) . ']';
+            }
             date_modify($dateIterator, '+1 day');
         }
 
