@@ -41,3 +41,4 @@ tests/_support/_generated
 
 #db file has passwords in it
 config/db_local.php
+config/db_deployed.php
