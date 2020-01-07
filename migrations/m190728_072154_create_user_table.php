@@ -12,8 +12,6 @@ class m190728_072154_create_user_table extends Migration
      */
     public function safeUp()
     {
-        $this->dropTable('Users');
-
         $this->createTable('{{%user}}', [
             'id' => $this->primaryKey(),
             'user_name' => $this->string()->notNull(),
