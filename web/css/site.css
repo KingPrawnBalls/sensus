@@ -177,6 +177,7 @@ a.desc:after {
 
 .attendance-create .form-group label {
     margin-right: 10px;
+    white-space: nowrap;
 }
 
 .attendance-view td span span:first-child {
