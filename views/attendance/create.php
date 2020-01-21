@@ -36,7 +36,7 @@ array_walk($attendanceCodeDropdownOptions,
 ?>
 <div class="attendance-create">
 
-    <h1><?= Html::encode($this->title) ?> <button class='btn btn-lg btn-success'><?=$form->name?></button> <?= date(Yii::$app->params['longDateFormat'])?> (<?=$formattedAttendancePeriod;?>)</h1>
+    <h1><?= Html::encode($this->title) ?> <button class='btn btn-lg btn-success inactive'><?=$form->name?></button> <?= date(Yii::$app->params['longDateFormat'])?> (<?=$formattedAttendancePeriod;?>)</h1>
 
     <div class="container">
         <?php $form = ActiveForm::begin(); ?>

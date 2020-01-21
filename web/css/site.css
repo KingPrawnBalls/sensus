@@ -59,6 +59,11 @@ nav ul {
     font-style: italic;
 }
 
+.inactive {
+    cursor: default;
+    pointer-events: none;
+}
+
 /* add sorting icons to gridview sort links */
 a.asc:after, a.desc:after {
     position: relative;
