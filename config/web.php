@@ -1,7 +1,8 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
+$params = require __DIR__ . '/params.php';
+$params['bsVersion'] = '4.x'; // this will set globally `bsVersion` to Bootstrap 4.x for all Krajee Extensions.  See https://demos.krajee.com/widget-details/datepicker#global-version
 
 $config = [
     'timeZone' => 'Europe/London',
