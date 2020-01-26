@@ -4,9 +4,9 @@
 /* @var $content string */
 
 use yii\helpers\Html;
-use yii\bootstrap\Alert;
-use yii\bootstrap\Nav;
-use yii\bootstrap\NavBar;
+use yii\bootstrap4\Alert;
+use yii\bootstrap4\Nav;
+use yii\bootstrap4\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
 
@@ -34,11 +34,11 @@ AppAsset::register($this);
         'brandImage' => '/images/KCS_Crown_book_type__WHT.png',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
-            'class' => 'navbar-inverse navdbar-fixed-top',
+            'class' => 'navbar-expand-md navbar-dark',
         ],
     ]);
     echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
+        'options' => ['class' => 'navbar-nav navbar-right ml-auto'],
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
 
@@ -53,11 +53,11 @@ AppAsset::register($this);
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]
             ) : (
-                '<li>'
+                '<li class="nav-item">'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(
                     'Logout (' . Yii::$app->user->identity->user_name . ')',
-                    ['class' => 'btn btn-link logout']
+                    ['class' => 'btn btn-link nav-link logout']
                 )
                 . Html::endForm()
                 . '</li>'

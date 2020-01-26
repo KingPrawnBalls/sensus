@@ -1,31 +1,29 @@
 {
-    "name": "yiisoft/yii2-app-basic",
-    "description": "Yii 2 Basic Project Template",
-    "keywords": ["yii2", "framework", "basic", "project template"],
-    "homepage": "http://www.yiiframework.com/",
+    "name": "7ms/sensus-for-schools",
+    "description": "Sensus for Schools | Attendance tracking made simple | For small schools and organisations",
+    "keywords": ["sensus", "attendance", "school", "education"],
+    "homepage": "https://sensusforschools.com/",
     "type": "project",
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://github.com/yiisoft/yii2/issues?state=open",
-        "forum": "http://www.yiiframework.com/forum/",
-        "wiki": "http://www.yiiframework.com/wiki/",
-        "irc": "irc://irc.freenode.net/yii",
-        "source": "https://github.com/yiisoft/yii2"
+        "issues": "https://sensusforschools.com/support",
+        "source": "https://github.com/KingPrawnBalls/sensus"
     },
     "minimum-stability": "stable",
     "require": {
         "php": ">=5.4.0",
         "yiisoft/yii2": "~2.0.14",
-        "yiisoft/yii2-bootstrap": "~2.0.0",
+        "yiisoft/yii2-bootstrap4": "~2.0.0",
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
         "moonlandsoft/yii2-phpexcel": "*",
-        "dimmitri/yii2-expand-row-column": "*"
+        "dimmitri/yii2-expand-row-column": "*",
+        "kartik-v/yii2-widget-datepicker": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
         "yiisoft/yii2-gii": "~2.1.0",
         "yiisoft/yii2-faker": "~2.0.0",
-
+        "twbs/bootstrap": "~4.4.1",
         "codeception/base": "~2.3.0",
         "codeception/verify": "~0.4.0",
         "codeception/specify": "~0.4.6",
@@ -44,6 +42,15 @@
         "post-create-project-cmd": [
             "yii\\composer\\Installer::postCreateProject",
             "yii\\composer\\Installer::postInstall"
+        ],
+        "build-bootstrap": [
+            "cp scss/* vendor/npm-asset/bootstrap/scss",
+            "(cd vendor/npm-asset/bootstrap && npm run css-compile-main && cd -)",
+            "(cd vendor/npm-asset/bootstrap && npm run css-prefix-main && cd -)",
+            "(cd vendor/npm-asset/bootstrap && npm run css-minify-main && cd -)",
+            "(cd vendor/npm-asset/bootstrap && npm run css-copy && cd -)",
+            "rm vendor/npm-asset/bootstrap/dist/css/bootstrap.css",
+            "mv vendor/npm-asset/bootstrap/dist/css/custom.css vendor/npm-asset/bootstrap/dist/css/bootstrap.css"
         ]
     },
     "extra": {
