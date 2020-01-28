@@ -22,6 +22,16 @@ use kartik\date\DatePicker;
 $this->registerJs(
     "$('td.attendance input').keyup(function(){ $(this).val($(this).val().toUpperCase()); });"
 );
+$this->registerJs(
+        <<<JS
+    $('#datePicker-kvdate').on('changeDate changeMonth changeYear', function(e) {
+        $('#btnChangeDate').prop('disabled', e.date ? false : true);
+    });
+    $('#datePicker-kvdate').on('clearDate', function(e) {
+        $('#btnChangeDate').prop('disabled', true);
+    });
+JS
+);
 
 $this->title = 'Register';
 
@@ -40,7 +50,7 @@ $allowedDaysOfWeek = Yii::$app->params['schoolDaysOfWeek'];
 $disallowedDaysOfWeek = '';
 foreach (str_split("1234567") as $day) {
     if (strpos($allowedDaysOfWeek, $day) === false) {
-        $disallowedDaysOfWeek .= ($day == '7' ? '0' : $day);  //PHP Sunday is 7, whereas JS Sunday is 0.
+        $disallowedDaysOfWeek .= ($day == '7' ? '0' : $day);  //In PHP Sunday=7, whereas in JS Sunday=0.
     }
 }
 
@@ -60,6 +70,7 @@ foreach (str_split("1234567") as $day) {
 
                             <?= DatePicker::widget([
                                 //See https://demos.krajee.com/widget-details/datepicker#settings
+                                'id' => 'datePicker',
                                 'name' => 'set_att_date',
                                 'value' => date('l d M Y', $dateAsTimestamp),
                                 'buttonOptions' => ['class'=>'btn btn-primary'],
@@ -85,7 +96,7 @@ foreach (str_split("1234567") as $day) {
                             </div>
                             <?php } ?>
                         </span>
-                        <button type="submit" class="btn btn-primary mb-1 float-right">Change Date &gt;</button>
+                        <button id="btnChangeDate" type="submit" class="btn btn-primary mb-1 float-right">Change Date &gt;</button>
                     </div>
                     <div class="font-weight-lighter small text-sm-right"><span class="text-danger"><em>Careful!</em></span> Changing date will lose any unsaved attendance set below.</div>
                 </div>
