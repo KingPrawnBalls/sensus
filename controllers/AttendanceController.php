@@ -49,18 +49,31 @@ class AttendanceController extends Controller
      * TODO use transactions
      *
      * @param integer $form_id of form (class)
+     * @param String | null $set_att_date
+     * @param integer | null $set_att_time_period
      * @return mixed
      */
-    public function actionCreate($form_id)
+    public function actionCreate($form_id, $set_att_date = null, $set_att_time_period = null)
     {
+        //See if a specific date/time has been requested
+        if ($set_att_date && $set_att_time_period) {
+            //Set up variables accordingly
+            $timestamp = strtotime($set_att_date);
+            $period = $set_att_time_period;
+        } else {
+            //Otherwise default to the current (clock) date and attendance period
+            $timestamp = time();
+            $period = Attendance::getCurrentPeriod();
+        }
+        $date = date(Yii::$app->params['dbDateFormat'], $timestamp);
+        $formattedDate = date(Yii::$app->params['longDateFormat'], $timestamp);
+
         $isSavedOk = false;
         $form = Form::findOne($form_id);
         $students = $form->students;
 
         //Create Attendance Model for each student
         $attendanceModelArray = array();
-        $date = date(Yii::$app->params['dbDateFormat']);
-
         foreach ($students as $student) {
             $queryParams = array(
                 'form_id' => $form_id,
@@ -140,16 +153,20 @@ class AttendanceController extends Controller
         if ($isSavedOk) {
             return $this->redirect(['site/index']);
         } else {
-            $currentPeriod = Attendance::getCurrentPeriod();
-            $isFullAttendanceInputRangeAllowed = Yii::$app->user->identity->isAdmin();
+            //Next two lines will change when/if a full RBAC system is adopted
+            $isUserAuthorizedToSetAnyAttendanceCode = Yii::$app->user->identity->isAdmin();
+            $isUserAuthorizedToSetAnyDate           = true;
 
             return $this->render('create', [
-                'currentPeriod' => $currentPeriod,
-                'formattedAttendancePeriod' => Attendance::ATTENDANCE_PERIOD_LABELS_LONG[$currentPeriod],
+                'period' => $period,
+                'dateAsTimestamp' => $timestamp,
+                'formattedDate' => $formattedDate,
+                'formattedAttendancePeriod' => Attendance::ATTENDANCE_PERIOD_LABELS_LONG[$period],
                 'attendanceModelArray' => $attendanceModelArray,
                 'students' => $students,
                 'form' => $form,
-                'isFullAttendanceInputRangeAllowed' => $isFullAttendanceInputRangeAllowed,
+                'isUserAuthorizedToSetAnyAttendanceCode' => $isUserAuthorizedToSetAnyAttendanceCode,
+                'isUserAuthorizedToSetAnyDate' => $isUserAuthorizedToSetAnyDate,
             ]);
         }
     }
