@@ -94,9 +94,9 @@ FontAwesomeAssets::register($this);
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; <?= date('Y') ?>.  All rights reserved.</p>
+        <p class="float-left">&copy; <?= date('Y') ?>.  All rights reserved.</p>
 
-        <p class="pull-right"><a href="http://kingshouseschool.org.uk">The King's House School, Windsor</a></p>
+        <p class="float-right"><a href="http://kingshouseschool.org.uk">The King's House School, Windsor</a></p>
     </div>
 </footer>
 
