@@ -64,9 +64,9 @@ foreach (str_split("1234567") as $day) {
         <?php if ($isUserAuthorizedToSetAnyDate) { ?>
             <form enctype="application/x-www-form-urlencoded" method="get">
                 <input type="hidden" name="form_id" value="<?= $form->id ?>" />
-                <div class="mt-5 mb-5 p-5 border border-primary rounded-lg">
+                <fieldset class="change-date mt-5 mb-5 p-5 border border-primary rounded-lg">
                     <div class="clearfix">
-                        <div class="p-1 d-inline-block" style="width:285px">
+                        <div class="date-picker p-1 d-inline-block" style="min-width:250px">
 
                             <?= DatePicker::widget([
                                 //See https://demos.krajee.com/widget-details/datepicker#settings
@@ -99,9 +99,12 @@ foreach (str_split("1234567") as $day) {
                         <button id="btnChangeDate" type="submit" class="btn btn-primary mb-1 float-right">Change Date &gt;</button>
                     </div>
                     <div class="font-weight-lighter small text-sm-right"><span class="text-danger"><em>Careful!</em></span> Changing date will lose any unsaved attendance set below.</div>
-                </div>
+                </fieldset>
             </form>
         <?php } ?>
+
+    </div>
+    <div class="container">
 
         <?php $form = ActiveForm::begin(); ?>
 

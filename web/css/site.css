@@ -151,6 +151,16 @@ a.desc:after {
         width: 75%;
     }
 }
+@media (max-width: 480px) {
+    .attendance-create fieldset.change-date {
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    .attendance-create .date-picker {
+        width: 100%;
+    }
+}
 
 .attendance-create td {
     width: 33%;
