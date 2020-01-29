@@ -151,16 +151,6 @@ a.desc:after {
         width: 75%;
     }
 }
-@media (max-width: 480px) {
-    .attendance-create fieldset.change-date {
-        padding: 0 !important;
-        border: none !important;
-    }
-
-    .attendance-create .date-picker {
-        width: 100%;
-    }
-}
 
 .attendance-create td {
     width: 33%;
@@ -188,6 +178,26 @@ a.desc:after {
 .attendance-create .form-group label {
     margin-right: 10px;
     white-space: nowrap;
+}
+
+/** mobile */
+@media (max-width: 480px) {
+    .attendance-create fieldset.change-date {
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    .attendance-create .date-picker {
+        width: 100%;
+    }
+
+    .attendance-create td:nth-child(3) {
+        display: none;
+    }
+
+    .attendance-create td {
+        width: 50%;
+    }
 }
 
 .attendance-view td span span:first-child {
