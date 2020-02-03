@@ -16,7 +16,7 @@ $config = [
     ],
     'components' => [
         'assetManager' => [
-            'linkAssets' => true,
+            'linkAssets' => false,  //Must stay like this to work when deployed to a shared hosting environment
         ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
